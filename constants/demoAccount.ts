@@ -1,0 +1,3 @@
+export const INITIAL_CASH_BALANCE = 1240;
+export const INITIAL_PORTFOLIO_PNL = 0;
+export const DEPOSIT_INCREMENT = 100;

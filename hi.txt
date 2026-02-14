@@ -1,0 +1,6 @@
+Current Errors
+1 Whenever I run Monthly market resolves within 3session but it is meant to be never resolves
+2 That portfolio dosent update properly nor when i refresh it just is 0 proper logic not implement in it and it dosent sync with changes in chart
+3 Also Add a notifican when a position opened
+4 Add alert before opening position 
+5 Order history is not part of prediction position it is independent

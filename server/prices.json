@@ -1,0 +1,1613 @@
+{
+  "metadata": {
+    "createdAt": "2026-02-13T00:00:00.000Z",
+    "version": "2.0",
+    "description": "DRAM prices normalized around base values with bounded volatility"
+  },
+  "currentPrices": {
+    "DDR5": 39.97,
+    "DDR4": 77.599,
+    "GDDR5": 9.364,
+    "GDDR6": 10.109
+  },
+  "priceHistory": {
+    "DDR5": [
+      {
+        "price": 37.812,
+        "timestamp": "2026-02-13T09:00:00.000Z",
+        "source": "seed"
+      },
+      {
+        "price": 37.946,
+        "timestamp": "2026-02-13T09:05:00.000Z",
+        "source": "seed"
+      },
+      {
+        "price": 38.024,
+        "timestamp": "2026-02-13T09:10:00.000Z",
+        "source": "seed"
+      },
+      {
+        "price": 38.175,
+        "timestamp": "2026-02-13T09:15:00.000Z",
+        "source": "seed"
+      },
+      {
+        "price": 38.102,
+        "timestamp": "2026-02-13T09:20:00.000Z",
+        "source": "seed"
+      },
+      {
+        "price": 37.441,
+        "timestamp": "2026-02-13T15:01:58.165Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 38.342,
+        "timestamp": "2026-02-13T15:03:08.668Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 37.091,
+        "timestamp": "2026-02-13T15:03:10.270Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 38.789,
+        "timestamp": "2026-02-13T15:03:10.924Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 39.97,
+        "timestamp": "2026-02-13T15:03:11.675Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 39.356,
+        "timestamp": "2026-02-13T15:03:12.637Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 37.942,
+        "timestamp": "2026-02-13T15:26:52.911Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 39.281,
+        "timestamp": "2026-02-13T15:35:07.374Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 39.931,
+        "timestamp": "2026-02-13T15:51:41.337Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 38.156,
+        "timestamp": "2026-02-13T16:10:07.778Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 38.121,
+        "timestamp": "2026-02-13T16:10:09.816Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 38.129,
+        "timestamp": "2026-02-13T16:10:11.195Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 38.266,
+        "timestamp": "2026-02-13T18:36:35.158Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 38.271,
+        "timestamp": "2026-02-13T18:36:48.424Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 37.665,
+        "timestamp": "2026-02-13T19:12:17.278Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 37.49,
+        "timestamp": "2026-02-13T19:17:45.650Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 36.793,
+        "timestamp": "2026-02-13T19:17:45.712Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 36.522,
+        "timestamp": "2026-02-13T19:17:45.723Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 38.348,
+        "timestamp": "2026-02-13T19:17:52.127Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 37.884,
+        "timestamp": "2026-02-13T19:17:52.176Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 36.164,
+        "timestamp": "2026-02-13T19:17:52.185Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 37.754,
+        "timestamp": "2026-02-13T19:18:01.327Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 36.164,
+        "timestamp": "2026-02-13T19:18:01.415Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 36.164,
+        "timestamp": "2026-02-13T19:18:01.426Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 36.164,
+        "timestamp": "2026-02-13T19:18:24.319Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 36.451,
+        "timestamp": "2026-02-13T19:18:24.459Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 36.739,
+        "timestamp": "2026-02-13T19:18:24.471Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 37.191,
+        "timestamp": "2026-02-13T19:28:26.422Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 38.545,
+        "timestamp": "2026-02-13T19:28:28.404Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 38.612,
+        "timestamp": "2026-02-13T19:28:44.063Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 39.548,
+        "timestamp": "2026-02-13T19:28:52.704Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 37.886,
+        "timestamp": "2026-02-13T19:29:10.804Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 36.877,
+        "timestamp": "2026-02-13T19:29:17.095Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 36.563,
+        "timestamp": "2026-02-13T19:30:15.356Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 37.815,
+        "timestamp": "2026-02-13T19:30:24.606Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 38.59,
+        "timestamp": "2026-02-13T19:30:53.478Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 36.687,
+        "timestamp": "2026-02-13T19:31:02.937Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 36.164,
+        "timestamp": "2026-02-13T19:31:12.438Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 36.164,
+        "timestamp": "2026-02-13T19:35:19.158Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 36.362,
+        "timestamp": "2026-02-13T19:35:21.390Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 37.975,
+        "timestamp": "2026-02-13T19:46:10.983Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 36.719,
+        "timestamp": "2026-02-13T19:46:17.425Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 38.492,
+        "timestamp": "2026-02-13T19:46:22.609Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 39.97,
+        "timestamp": "2026-02-13T21:25:38.317Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 39.97,
+        "timestamp": "2026-02-13T21:25:56.840Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 39.97,
+        "timestamp": "2026-02-13T21:26:04.860Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 39.86,
+        "timestamp": "2026-02-13T21:39:40.499Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 39.97,
+        "timestamp": "2026-02-13T21:39:47.674Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 39.97,
+        "timestamp": "2026-02-13T21:39:51.460Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 39.614,
+        "timestamp": "2026-02-13T22:00:43.009Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 39.97,
+        "timestamp": "2026-02-13T22:00:51.004Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 39.97,
+        "timestamp": "2026-02-13T22:00:59.070Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 39.97,
+        "timestamp": "2026-02-13T22:01:03.141Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 39.97,
+        "timestamp": "2026-02-13T22:01:07.137Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 38.346,
+        "timestamp": "2026-02-13T22:01:11.736Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 37.176,
+        "timestamp": "2026-02-13T22:01:17.346Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 38.983,
+        "timestamp": "2026-02-13T22:01:23.509Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 39.871,
+        "timestamp": "2026-02-13T22:01:45.978Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 39.97,
+        "timestamp": "2026-02-13T22:09:34.354Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 39.97,
+        "timestamp": "2026-02-13T22:09:39.147Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 39.97,
+        "timestamp": "2026-02-13T22:09:41.383Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 39.604,
+        "timestamp": "2026-02-13T22:09:42.647Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 38.404,
+        "timestamp": "2026-02-13T22:09:44.982Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 37.158,
+        "timestamp": "2026-02-13T22:11:14.637Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 36.75,
+        "timestamp": "2026-02-13T22:11:35.455Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 37.234,
+        "timestamp": "2026-02-13T22:11:37.660Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 38.596,
+        "timestamp": "2026-02-13T22:11:39.443Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 38.068,
+        "timestamp": "2026-02-13T22:11:41.330Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 38.615,
+        "timestamp": "2026-02-13T22:16:00.896Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 39.852,
+        "timestamp": "2026-02-13T22:16:29.003Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 38.3,
+        "timestamp": "2026-02-13T22:16:40.119Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 37.988,
+        "timestamp": "2026-02-13T22:19:17.164Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 39.444,
+        "timestamp": "2026-02-13T22:19:22.386Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 39.97,
+        "timestamp": "2026-02-13T22:19:25.092Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 38.275,
+        "timestamp": "2026-02-13T22:21:10.698Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 36.933,
+        "timestamp": "2026-02-13T22:34:00.538Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 36.164,
+        "timestamp": "2026-02-13T22:34:01.590Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 36.164,
+        "timestamp": "2026-02-13T22:34:03.296Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 37.972,
+        "timestamp": "2026-02-13T22:34:08.769Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 38.338,
+        "timestamp": "2026-02-13T22:34:10.149Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 39.484,
+        "timestamp": "2026-02-13T22:34:11.897Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 39.97,
+        "timestamp": "2026-02-13T22:36:11.606Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 39.97,
+        "timestamp": "2026-02-13T22:36:13.924Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 39.97,
+        "timestamp": "2026-02-13T22:36:15.556Z",
+        "source": "session-skip"
+      }
+    ],
+    "DDR4": [
+      {
+        "price": 78.721,
+        "timestamp": "2026-02-13T09:00:00.000Z",
+        "source": "seed"
+      },
+      {
+        "price": 78.552,
+        "timestamp": "2026-02-13T09:05:00.000Z",
+        "source": "seed"
+      },
+      {
+        "price": 78.288,
+        "timestamp": "2026-02-13T09:10:00.000Z",
+        "source": "seed"
+      },
+      {
+        "price": 78.197,
+        "timestamp": "2026-02-13T09:15:00.000Z",
+        "source": "seed"
+      },
+      {
+        "price": 78.333,
+        "timestamp": "2026-02-13T09:20:00.000Z",
+        "source": "seed"
+      },
+      {
+        "price": 81.953,
+        "timestamp": "2026-02-13T19:17:45.698Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 78.492,
+        "timestamp": "2026-02-13T19:17:45.714Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 74.793,
+        "timestamp": "2026-02-13T19:17:45.726Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 74.489,
+        "timestamp": "2026-02-13T19:17:52.167Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 78.213,
+        "timestamp": "2026-02-13T19:17:52.178Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 76.733,
+        "timestamp": "2026-02-13T19:17:52.187Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 80.144,
+        "timestamp": "2026-02-13T19:18:01.399Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 80.57,
+        "timestamp": "2026-02-13T19:18:01.417Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 79.684,
+        "timestamp": "2026-02-13T19:18:01.433Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 82.329,
+        "timestamp": "2026-02-13T19:18:24.444Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 79.783,
+        "timestamp": "2026-02-13T19:18:24.462Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 82.177,
+        "timestamp": "2026-02-13T19:18:24.475Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 79.705,
+        "timestamp": "2026-02-13T19:28:26.454Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 77.627,
+        "timestamp": "2026-02-13T19:28:28.412Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 78.981,
+        "timestamp": "2026-02-13T19:28:44.068Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 76.733,
+        "timestamp": "2026-02-13T19:28:52.708Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 80.57,
+        "timestamp": "2026-02-13T19:29:10.808Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 77.852,
+        "timestamp": "2026-02-13T19:29:17.098Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 77.022,
+        "timestamp": "2026-02-13T19:30:15.369Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 75.822,
+        "timestamp": "2026-02-13T19:30:24.615Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 75.765,
+        "timestamp": "2026-02-13T19:30:53.490Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 79.553,
+        "timestamp": "2026-02-13T19:31:02.940Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 78.883,
+        "timestamp": "2026-02-13T19:31:12.442Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 81.932,
+        "timestamp": "2026-02-13T19:35:19.162Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 81.534,
+        "timestamp": "2026-02-13T19:35:21.396Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 77.933,
+        "timestamp": "2026-02-13T19:46:10.987Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 77.613,
+        "timestamp": "2026-02-13T19:46:17.427Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 78.889,
+        "timestamp": "2026-02-13T19:46:22.611Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 81.078,
+        "timestamp": "2026-02-13T21:25:38.320Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 81.024,
+        "timestamp": "2026-02-13T21:25:56.843Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 81.316,
+        "timestamp": "2026-02-13T21:26:04.862Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 77.25,
+        "timestamp": "2026-02-13T21:39:40.503Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 79.077,
+        "timestamp": "2026-02-13T21:39:47.677Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 80.396,
+        "timestamp": "2026-02-13T21:39:51.469Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 78.109,
+        "timestamp": "2026-02-13T22:00:43.013Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 76.623,
+        "timestamp": "2026-02-13T22:00:51.011Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 75.918,
+        "timestamp": "2026-02-13T22:00:59.074Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 76.654,
+        "timestamp": "2026-02-13T22:01:03.145Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 74.489,
+        "timestamp": "2026-02-13T22:01:07.141Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 76.422,
+        "timestamp": "2026-02-13T22:01:11.741Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 79.974,
+        "timestamp": "2026-02-13T22:01:17.354Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 78.345,
+        "timestamp": "2026-02-13T22:01:23.512Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 79.542,
+        "timestamp": "2026-02-13T22:01:45.981Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 77.451,
+        "timestamp": "2026-02-13T22:09:34.364Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 79.957,
+        "timestamp": "2026-02-13T22:09:39.159Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 77.309,
+        "timestamp": "2026-02-13T22:09:41.386Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 74.489,
+        "timestamp": "2026-02-13T22:09:42.650Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 75.972,
+        "timestamp": "2026-02-13T22:09:44.985Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 76.155,
+        "timestamp": "2026-02-13T22:11:14.640Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 78.39,
+        "timestamp": "2026-02-13T22:11:35.458Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 82.233,
+        "timestamp": "2026-02-13T22:11:37.662Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 78.444,
+        "timestamp": "2026-02-13T22:11:39.447Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 75.842,
+        "timestamp": "2026-02-13T22:11:41.358Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 74.489,
+        "timestamp": "2026-02-13T22:16:00.899Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 74.489,
+        "timestamp": "2026-02-13T22:16:29.020Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 74.489,
+        "timestamp": "2026-02-13T22:16:40.127Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 78.213,
+        "timestamp": "2026-02-13T22:19:17.173Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 74.904,
+        "timestamp": "2026-02-13T22:19:22.390Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 74.608,
+        "timestamp": "2026-02-13T22:19:25.095Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 75.226,
+        "timestamp": "2026-02-13T22:21:10.702Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 75.734,
+        "timestamp": "2026-02-13T22:34:00.541Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 76.355,
+        "timestamp": "2026-02-13T22:34:01.594Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 77.631,
+        "timestamp": "2026-02-13T22:34:03.299Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 75.947,
+        "timestamp": "2026-02-13T22:34:08.773Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 79.744,
+        "timestamp": "2026-02-13T22:34:10.153Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 78.362,
+        "timestamp": "2026-02-13T22:34:11.902Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 74.922,
+        "timestamp": "2026-02-13T22:36:11.608Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 74.489,
+        "timestamp": "2026-02-13T22:36:13.926Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 77.599,
+        "timestamp": "2026-02-13T22:36:15.558Z",
+        "source": "session-skip"
+      }
+    ],
+    "GDDR5": [
+      {
+        "price": 9.308,
+        "timestamp": "2026-02-13T09:00:00.000Z",
+        "source": "seed"
+      },
+      {
+        "price": 9.356,
+        "timestamp": "2026-02-13T09:05:00.000Z",
+        "source": "seed"
+      },
+      {
+        "price": 9.419,
+        "timestamp": "2026-02-13T09:10:00.000Z",
+        "source": "seed"
+      },
+      {
+        "price": 9.464,
+        "timestamp": "2026-02-13T09:15:00.000Z",
+        "source": "seed"
+      },
+      {
+        "price": 9.441,
+        "timestamp": "2026-02-13T09:20:00.000Z",
+        "source": "seed"
+      },
+      {
+        "price": 9.54,
+        "timestamp": "2026-02-13T15:51:45.561Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 9.466,
+        "timestamp": "2026-02-13T19:17:45.704Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 9.879,
+        "timestamp": "2026-02-13T19:17:45.718Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 9.385,
+        "timestamp": "2026-02-13T19:17:45.728Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 9.303,
+        "timestamp": "2026-02-13T19:17:52.171Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 9.084,
+        "timestamp": "2026-02-13T19:17:52.181Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 9.002,
+        "timestamp": "2026-02-13T19:17:52.190Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 8.939,
+        "timestamp": "2026-02-13T19:18:01.407Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 8.978,
+        "timestamp": "2026-02-13T19:18:01.420Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 9.146,
+        "timestamp": "2026-02-13T19:18:01.435Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 9.234,
+        "timestamp": "2026-02-13T19:18:24.452Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 9.179,
+        "timestamp": "2026-02-13T19:18:24.465Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 9.603,
+        "timestamp": "2026-02-13T19:18:24.478Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 9.225,
+        "timestamp": "2026-02-13T19:28:26.463Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 9.198,
+        "timestamp": "2026-02-13T19:28:28.421Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 9.128,
+        "timestamp": "2026-02-13T19:28:44.071Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 8.939,
+        "timestamp": "2026-02-13T19:28:52.718Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 9.23,
+        "timestamp": "2026-02-13T19:29:10.811Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 8.939,
+        "timestamp": "2026-02-13T19:29:17.101Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 9.355,
+        "timestamp": "2026-02-13T19:30:15.372Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 9.232,
+        "timestamp": "2026-02-13T19:30:24.631Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 9.506,
+        "timestamp": "2026-02-13T19:30:53.510Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 9.031,
+        "timestamp": "2026-02-13T19:31:02.944Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 9.113,
+        "timestamp": "2026-02-13T19:31:12.447Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 9.569,
+        "timestamp": "2026-02-13T19:35:19.172Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 9.522,
+        "timestamp": "2026-02-13T19:35:21.400Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 9.395,
+        "timestamp": "2026-02-13T19:46:10.990Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 9.603,
+        "timestamp": "2026-02-13T19:46:17.429Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 9.692,
+        "timestamp": "2026-02-13T19:46:22.614Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 9.412,
+        "timestamp": "2026-02-13T21:25:38.324Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 9.605,
+        "timestamp": "2026-02-13T21:25:56.854Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 9.21,
+        "timestamp": "2026-02-13T21:26:04.864Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 9.553,
+        "timestamp": "2026-02-13T21:39:40.508Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 9.234,
+        "timestamp": "2026-02-13T21:39:47.684Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 8.979,
+        "timestamp": "2026-02-13T21:39:51.478Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 8.939,
+        "timestamp": "2026-02-13T22:00:43.016Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 8.976,
+        "timestamp": "2026-02-13T22:00:51.016Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 8.939,
+        "timestamp": "2026-02-13T22:00:59.080Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 9.151,
+        "timestamp": "2026-02-13T22:01:03.149Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 8.939,
+        "timestamp": "2026-02-13T22:01:07.144Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 9.191,
+        "timestamp": "2026-02-13T22:01:11.745Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 8.984,
+        "timestamp": "2026-02-13T22:01:17.359Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 8.939,
+        "timestamp": "2026-02-13T22:01:23.521Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 8.954,
+        "timestamp": "2026-02-13T22:01:45.984Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 9.402,
+        "timestamp": "2026-02-13T22:09:34.368Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 9.517,
+        "timestamp": "2026-02-13T22:09:39.163Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 9.868,
+        "timestamp": "2026-02-13T22:09:41.388Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 9.879,
+        "timestamp": "2026-02-13T22:09:42.652Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 9.606,
+        "timestamp": "2026-02-13T22:09:44.988Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 9.617,
+        "timestamp": "2026-02-13T22:11:14.642Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 9.412,
+        "timestamp": "2026-02-13T22:11:35.462Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 9.676,
+        "timestamp": "2026-02-13T22:11:37.664Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 9.451,
+        "timestamp": "2026-02-13T22:11:39.450Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 9.849,
+        "timestamp": "2026-02-13T22:11:41.365Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 9.879,
+        "timestamp": "2026-02-13T22:16:00.911Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 9.728,
+        "timestamp": "2026-02-13T22:16:29.026Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 9.85,
+        "timestamp": "2026-02-13T22:16:40.135Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 9.574,
+        "timestamp": "2026-02-13T22:19:17.175Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 9.365,
+        "timestamp": "2026-02-13T22:19:22.398Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 9.607,
+        "timestamp": "2026-02-13T22:19:25.099Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 9.15,
+        "timestamp": "2026-02-13T22:21:10.705Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 8.939,
+        "timestamp": "2026-02-13T22:34:00.543Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 9.386,
+        "timestamp": "2026-02-13T22:34:01.596Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 9.454,
+        "timestamp": "2026-02-13T22:34:03.302Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 9.564,
+        "timestamp": "2026-02-13T22:34:08.777Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 9.222,
+        "timestamp": "2026-02-13T22:34:10.158Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 9.29,
+        "timestamp": "2026-02-13T22:34:11.909Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 9.235,
+        "timestamp": "2026-02-13T22:36:11.610Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 9.006,
+        "timestamp": "2026-02-13T22:36:13.929Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 9.364,
+        "timestamp": "2026-02-13T22:36:15.561Z",
+        "source": "session-skip"
+      }
+    ],
+    "GDDR6": [
+      {
+        "price": 9.742,
+        "timestamp": "2026-02-13T09:00:00.000Z",
+        "source": "seed"
+      },
+      {
+        "price": 9.689,
+        "timestamp": "2026-02-13T09:05:00.000Z",
+        "source": "seed"
+      },
+      {
+        "price": 9.633,
+        "timestamp": "2026-02-13T09:10:00.000Z",
+        "source": "seed"
+      },
+      {
+        "price": 9.598,
+        "timestamp": "2026-02-13T09:15:00.000Z",
+        "source": "seed"
+      },
+      {
+        "price": 9.621,
+        "timestamp": "2026-02-13T09:20:00.000Z",
+        "source": "seed"
+      },
+      {
+        "price": 9.931,
+        "timestamp": "2026-02-13T19:17:45.708Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 9.571,
+        "timestamp": "2026-02-13T19:17:45.720Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 9.924,
+        "timestamp": "2026-02-13T19:17:45.738Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 9.566,
+        "timestamp": "2026-02-13T19:17:52.174Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 10.044,
+        "timestamp": "2026-02-13T19:17:52.183Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 9.799,
+        "timestamp": "2026-02-13T19:17:52.194Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 9.468,
+        "timestamp": "2026-02-13T19:18:01.411Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 9.941,
+        "timestamp": "2026-02-13T19:18:01.423Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 9.642,
+        "timestamp": "2026-02-13T19:18:01.438Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 10.117,
+        "timestamp": "2026-02-13T19:18:24.454Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 9.611,
+        "timestamp": "2026-02-13T19:18:24.469Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 9.362,
+        "timestamp": "2026-02-13T19:18:24.482Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 9.171,
+        "timestamp": "2026-02-13T19:28:26.466Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 9.593,
+        "timestamp": "2026-02-13T19:28:28.429Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 9.599,
+        "timestamp": "2026-02-13T19:28:44.080Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 9.3,
+        "timestamp": "2026-02-13T19:28:52.722Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 9.171,
+        "timestamp": "2026-02-13T19:29:10.814Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 9.171,
+        "timestamp": "2026-02-13T19:29:17.103Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 9.171,
+        "timestamp": "2026-02-13T19:30:15.380Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 9.171,
+        "timestamp": "2026-02-13T19:30:24.638Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 9.171,
+        "timestamp": "2026-02-13T19:30:53.515Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 9.182,
+        "timestamp": "2026-02-13T19:31:02.955Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 9.171,
+        "timestamp": "2026-02-13T19:31:12.451Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 9.171,
+        "timestamp": "2026-02-13T19:35:19.174Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 9.412,
+        "timestamp": "2026-02-13T19:35:21.404Z",
+        "source": "manual-update"
+      },
+      {
+        "price": 9.338,
+        "timestamp": "2026-02-13T19:46:10.992Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 9.434,
+        "timestamp": "2026-02-13T19:46:17.433Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 9.171,
+        "timestamp": "2026-02-13T19:46:22.617Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 9.63,
+        "timestamp": "2026-02-13T21:25:38.326Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 9.916,
+        "timestamp": "2026-02-13T21:25:56.856Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 10.047,
+        "timestamp": "2026-02-13T21:26:04.869Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 10.052,
+        "timestamp": "2026-02-13T21:39:40.512Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 10.137,
+        "timestamp": "2026-02-13T21:39:47.686Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 10.137,
+        "timestamp": "2026-02-13T21:39:51.484Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 9.741,
+        "timestamp": "2026-02-13T22:00:43.018Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 9.938,
+        "timestamp": "2026-02-13T22:00:51.018Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 9.461,
+        "timestamp": "2026-02-13T22:00:59.083Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 9.171,
+        "timestamp": "2026-02-13T22:01:03.151Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 9.493,
+        "timestamp": "2026-02-13T22:01:07.147Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 9.917,
+        "timestamp": "2026-02-13T22:01:11.749Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 10.137,
+        "timestamp": "2026-02-13T22:01:17.363Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 9.792,
+        "timestamp": "2026-02-13T22:01:23.524Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 9.395,
+        "timestamp": "2026-02-13T22:01:45.986Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 9.396,
+        "timestamp": "2026-02-13T22:09:34.371Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 9.743,
+        "timestamp": "2026-02-13T22:09:39.168Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 9.964,
+        "timestamp": "2026-02-13T22:09:41.392Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 10.087,
+        "timestamp": "2026-02-13T22:09:42.655Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 10.137,
+        "timestamp": "2026-02-13T22:09:44.991Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 10.137,
+        "timestamp": "2026-02-13T22:11:14.645Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 9.667,
+        "timestamp": "2026-02-13T22:11:35.478Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 9.774,
+        "timestamp": "2026-02-13T22:11:37.666Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 10.137,
+        "timestamp": "2026-02-13T22:11:39.454Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 9.809,
+        "timestamp": "2026-02-13T22:11:41.369Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 9.356,
+        "timestamp": "2026-02-13T22:16:00.915Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 9.559,
+        "timestamp": "2026-02-13T22:16:29.031Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 9.87,
+        "timestamp": "2026-02-13T22:16:40.142Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 10.137,
+        "timestamp": "2026-02-13T22:19:17.179Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 9.71,
+        "timestamp": "2026-02-13T22:19:22.401Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 9.576,
+        "timestamp": "2026-02-13T22:19:25.102Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 10.003,
+        "timestamp": "2026-02-13T22:21:10.707Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 9.867,
+        "timestamp": "2026-02-13T22:34:00.546Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 10.137,
+        "timestamp": "2026-02-13T22:34:01.603Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 9.918,
+        "timestamp": "2026-02-13T22:34:03.304Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 10.137,
+        "timestamp": "2026-02-13T22:34:08.780Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 9.875,
+        "timestamp": "2026-02-13T22:34:10.161Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 9.981,
+        "timestamp": "2026-02-13T22:34:11.912Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 10.055,
+        "timestamp": "2026-02-13T22:36:11.613Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 10.137,
+        "timestamp": "2026-02-13T22:36:13.931Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 10.109,
+        "timestamp": "2026-02-13T22:36:15.563Z",
+        "source": "session-skip"
+      }
+    ]
+  },
+  "statistics": {
+    "DDR5": {
+      "highest": 39.97,
+      "lowest": 36.164,
+      "average": 38.273595505617955,
+      "totalUpdates": 89,
+      "lastUpdate": "2026-02-13T22:36:15.556Z"
+    },
+    "DDR4": {
+      "highest": 82.329,
+      "lowest": 74.489,
+      "average": 77.93952702702698,
+      "totalUpdates": 74,
+      "lastUpdate": "2026-02-13T22:36:15.558Z"
+    },
+    "GDDR5": {
+      "highest": 9.879,
+      "lowest": 8.939,
+      "average": 9.337306666666665,
+      "totalUpdates": 75,
+      "lastUpdate": "2026-02-13T22:36:15.561Z"
+    },
+    "GDDR6": {
+      "highest": 10.137,
+      "lowest": 9.171,
+      "average": 9.701324324324325,
+      "totalUpdates": 74,
+      "lastUpdate": "2026-02-13T22:36:15.563Z"
+    }
+  }
+}

@@ -1,0 +1,85 @@
+{
+  "metadata": {
+    "createdAt": "2026-02-13T22:33:49.815Z",
+    "version": "2.0"
+  },
+  "accounts": {
+    "guest-b8daa2d2-161d-4730-9589-23a36890cc41": {
+      "username": "DEMO",
+      "cashBalance": 1240.01,
+      "portfolioPnL": 0,
+      "prediction": {
+        "realizedPnL": 0.0042,
+        "nextPositionId": 2,
+        "nextOrderId": 5,
+        "openPositions": [],
+        "orderHistory": [
+          {
+            "id": 4,
+            "type": "SETTLEMENT",
+            "marketId": "2",
+            "ticker": "DDR5-DAILY",
+            "category": "DDR5",
+            "period": "DAILY",
+            "outcome": "YES",
+            "contracts": 0.0082,
+            "price": 1,
+            "amount": 0.0082,
+            "realizedPnl": 0.0042,
+            "result": "WIN",
+            "session": 9,
+            "note": "Settled after 3 sessions",
+            "createdAt": "2026-02-13T22:36:15.568Z"
+          },
+          {
+            "id": 3,
+            "type": "SELL",
+            "marketId": "2",
+            "ticker": "DDR5-DAILY",
+            "category": "DDR5",
+            "period": "DAILY",
+            "outcome": "YES",
+            "contracts": 0.12,
+            "price": 0.4923,
+            "amount": 0.0591,
+            "realizedPnl": 0,
+            "session": 6,
+            "createdAt": "2026-02-13T22:35:33.460Z"
+          },
+          {
+            "id": 2,
+            "type": "SELL",
+            "marketId": "2",
+            "ticker": "DDR5-DAILY",
+            "category": "DDR5",
+            "period": "DAILY",
+            "outcome": "YES",
+            "contracts": 203,
+            "price": 0.4923,
+            "amount": 99.9369,
+            "realizedPnl": 0,
+            "session": 6,
+            "createdAt": "2026-02-13T22:35:17.643Z"
+          },
+          {
+            "id": 1,
+            "type": "BUY",
+            "marketId": "2",
+            "ticker": "DDR5-DAILY",
+            "category": "DDR5",
+            "period": "DAILY",
+            "outcome": "YES",
+            "contracts": 203.1282,
+            "price": 0.4923,
+            "amount": 100,
+            "realizedPnl": 0,
+            "session": 6,
+            "createdAt": "2026-02-13T22:34:37.107Z"
+          }
+        ]
+      },
+      "createdAt": "2026-02-13T22:33:49.821Z",
+      "updatedAt": "2026-02-13T22:36:15.568Z"
+    }
+  }
+}
