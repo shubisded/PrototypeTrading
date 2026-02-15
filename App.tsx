@@ -63,6 +63,33 @@ type PredictionPortfolio = {
   orderHistory: PredictionOrder[];
 };
 
+type SyntheticPosition = {
+  id: number;
+  ticker: string;
+  units: number;
+  avgEntryPrice: number;
+  investedAmount: number;
+  markPrice: number;
+  marketValue: number;
+  pnl: number;
+};
+
+type SyntheticOrder = {
+  id: number;
+  type: "BUY" | "SELL";
+  ticker: string;
+  units: number;
+  price: number;
+  amount: number;
+  realizedPnl: number;
+  createdAt: string;
+};
+
+type SyntheticPortfolio = {
+  openPositions: SyntheticPosition[];
+  orderHistory: SyntheticOrder[];
+};
+
 type AppNotice = {
   id: number;
   text: string;
@@ -72,7 +99,6 @@ type AppNotice = {
 type MarketTemplate = Omit<Market, "question" | "targetPrice">;
 
 const MOCK_MARKETS: MarketTemplate[] = [
-  // DDR5
   {
     id: "1",
     ticker: "DDR5-AUG-F",
@@ -89,64 +115,27 @@ const MOCK_MARKETS: MarketTemplate[] = [
     category: "DDR5",
     period: "DAILY",
   },
-  // DDR4
   {
     id: "3",
-    ticker: "DDR4-AUG-F",
-    probability: 21,
-    volume: "$2.1M",
-    category: "DDR4",
+    ticker: "DDR6-AUG-F",
+    probability: 78,
+    volume: "$890K",
+    category: "DDR6",
     period: "MONTHLY",
   },
   {
     id: "4",
-    ticker: "DDR4-DAILY",
-    probability: 35,
-    volume: "$780K",
-    category: "DDR4",
-    period: "DAILY",
-  },
-  // GDDR6
-  {
-    id: "5",
-    ticker: "G6-AUG-F",
-    probability: 78,
-    volume: "$890K",
-    category: "GDDR6",
-    period: "MONTHLY",
-  },
-  {
-    id: "6",
-    ticker: "G6-DAILY",
+    ticker: "DDR6-DAILY",
     probability: 52,
     volume: "$1.4M",
-    category: "GDDR6",
-    period: "DAILY",
-  },
-  // GDDR5
-  {
-    id: "7",
-    ticker: "G5-AUG-F",
-    probability: 55,
-    volume: "$410K",
-    category: "GDDR5",
-    period: "MONTHLY",
-  },
-  {
-    id: "8",
-    ticker: "G5-DAILY",
-    probability: 48,
-    volume: "$220K",
-    category: "GDDR5",
+    category: "DDR6",
     period: "DAILY",
   },
 ];
 
 const INITIAL_TICKER_PRICES: Record<string, number> = {
   DDR5: 38.067,
-  DDR4: 78.409,
-  GDDR6: 9.654,
-  GDDR5: 9.409,
+  DDR6: 9.654,
 };
 
 const App: React.FC = () => {
@@ -206,16 +195,30 @@ const App: React.FC = () => {
       openPositions: [],
       orderHistory: [],
     });
+  const [syntheticPortfolio, setSyntheticPortfolio] = useState<SyntheticPortfolio>(
+    {
+      openPositions: [],
+      orderHistory: [],
+    },
+  );
+  const [hideDustPositions, setHideDustPositions] = useState(true);
   const [notices, setNotices] = useState<AppNotice[]>([]);
   const guestId = getOrCreateGuestId();
   const lastSeenOrderIdRef = useRef<number>(0);
   const hasBootstrappedOrdersRef = useRef(false);
+  const portfolioRefreshTimerRef = useRef<number | null>(null);
 
   // Collapsible (non-draggable) dev panel state
   const [devOpen, setDevOpen] = useState(false);
 
   const currentPrice = tickerPrices[selectedTicker] || 0;
   const selectedTickerHistory = priceHistory[selectedTicker] || [];
+  const visiblePredictionPositions = predictionPortfolio.openPositions.filter(
+    (position) => (hideDustPositions ? position.contracts > 0.01 : true),
+  );
+  const visibleSyntheticPositions = syntheticPortfolio.openPositions.filter(
+    (position) => (hideDustPositions ? position.marketValue > 0.01 : true),
+  );
 
   const getTargetPriceForTemplate = (
     template: MarketTemplate,
@@ -344,6 +347,7 @@ const App: React.FC = () => {
         window.dispatchEvent(
           new CustomEvent("accountUpdated", {
             detail: {
+              source: "sync",
               cashBalance: Number(data.account.cashBalance) || 0,
               portfolioPnL: Number(data.account.portfolioPnL) || 0,
               username: data.account.username || "DEMO",
@@ -355,6 +359,50 @@ const App: React.FC = () => {
       // ignore
     }
   }, [guestId]);
+
+  const refreshSyntheticPortfolio = React.useCallback(async () => {
+    const socketURL = getBackendBaseURL();
+    try {
+      const response = await fetch(`${socketURL}/api/synthetic/portfolio`, {
+        headers: { "x-guest-id": guestId },
+      });
+      if (!response.ok) return;
+      const data = await response.json();
+      if (data?.synthetic) {
+        setSyntheticPortfolio({
+          openPositions: Array.isArray(data.synthetic.openPositions)
+            ? data.synthetic.openPositions
+            : [],
+          orderHistory: Array.isArray(data.synthetic.orderHistory)
+            ? data.synthetic.orderHistory
+            : [],
+        });
+      }
+      if (data?.account) {
+        window.dispatchEvent(
+          new CustomEvent("accountUpdated", {
+            detail: {
+              source: "sync",
+              cashBalance: Number(data.account.cashBalance) || 0,
+              portfolioPnL: Number(data.account.portfolioPnL) || 0,
+              username: data.account.username || "DEMO",
+            },
+          }),
+        );
+      }
+    } catch {
+      // ignore
+    }
+  }, [guestId]);
+
+  const schedulePortfolioRefresh = React.useCallback(() => {
+    if (portfolioRefreshTimerRef.current !== null) return;
+    portfolioRefreshTimerRef.current = window.setTimeout(() => {
+      portfolioRefreshTimerRef.current = null;
+      void refreshPredictionPortfolio();
+      void refreshSyntheticPortfolio();
+    }, 350);
+  }, [refreshPredictionPortfolio, refreshSyntheticPortfolio]);
 
   useEffect(() => {
     if (!notices.length) return;
@@ -427,7 +475,7 @@ const App: React.FC = () => {
         if (data.chanceHistories) {
           setChanceHistories(data.chanceHistories);
         }
-        void refreshPredictionPortfolio();
+        schedulePortfolioRefresh();
       },
     );
 
@@ -436,7 +484,16 @@ const App: React.FC = () => {
     return () => {
       newSocket.disconnect();
     };
-  }, [refreshPredictionPortfolio]);
+  }, [schedulePortfolioRefresh]);
+
+  useEffect(() => {
+    return () => {
+      if (portfolioRefreshTimerRef.current !== null) {
+        clearTimeout(portfolioRefreshTimerRef.current);
+        portfolioRefreshTimerRef.current = null;
+      }
+    };
+  }, []);
 
   // Fetch initial prices & histories from server so the chart isn't blank
   useEffect(() => {
@@ -483,12 +540,19 @@ const App: React.FC = () => {
   }, [refreshPredictionPortfolio]);
 
   useEffect(() => {
-    const onAccountUpdated = () => {
+    void refreshSyntheticPortfolio();
+  }, [refreshSyntheticPortfolio]);
+
+  useEffect(() => {
+    const onAccountUpdated = (event: Event) => {
+      const custom = event as CustomEvent<{ source?: string }>;
+      if (custom.detail?.source === "sync") return;
       void refreshPredictionPortfolio();
+      void refreshSyntheticPortfolio();
     };
     window.addEventListener("accountUpdated", onAccountUpdated);
     return () => window.removeEventListener("accountUpdated", onAccountUpdated);
-  }, [refreshPredictionPortfolio]);
+  }, [refreshPredictionPortfolio, refreshSyntheticPortfolio]);
 
   const updatePrice = (ticker: string, newPrice: number) => {
     // Send update to server - server will broadcast to all clients
@@ -728,6 +792,9 @@ const App: React.FC = () => {
               <SyntheticTradeCard
                 ticker={selectedTicker}
                 currentPrice={currentPrice}
+                onTradeExecuted={() => {
+                  void refreshSyntheticPortfolio();
+                }}
               />
             )}
 
@@ -762,7 +829,7 @@ const App: React.FC = () => {
                   : "text-[#7f8c8d] border-transparent hover:text-[#2ed3b7]"
               }`}
             >
-              Synthetic Positions (0)
+              Synthetic Positions ({visibleSyntheticPositions.length})
             </button>
             <button
               onClick={() => setPositionsTab("PREDICTION")}
@@ -772,7 +839,7 @@ const App: React.FC = () => {
                   : "text-[#7f8c8d] border-transparent hover:text-[#2ed3b7]"
               }`}
             >
-              Prediction Positions ({predictionPortfolio.openPositions.length})
+              Prediction Positions ({visiblePredictionPositions.length})
             </button>
             <button
               onClick={() => setPositionsTab("ORDER_HISTORY")}
@@ -782,21 +849,85 @@ const App: React.FC = () => {
                   : "text-[#7f8c8d] border-transparent hover:text-[#2ed3b7]"
               }`}
             >
-              Order History ({predictionPortfolio.orderHistory.length})
+              Order History (
+              {currentView === "SYNTHETIC"
+                ? syntheticPortfolio.orderHistory.length
+                : predictionPortfolio.orderHistory.length}
+              )
             </button>
+            {(positionsTab === "PREDICTION" || positionsTab === "SYNTHETIC") ? (
+              <label className="ml-auto mr-3 flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.12em] text-[#7f8c8d]">
+                <input
+                  type="checkbox"
+                  checked={hideDustPositions}
+                  onChange={(e) => setHideDustPositions(e.target.checked)}
+                  className="accent-[#2ed3b7]"
+                />
+                Hide Minimum Usd balance
+              </label>
+            ) : null}
           </div>
 
           <div className="h-48 overflow-y-auto custom-scrollbar p-4">
             {positionsTab === "SYNTHETIC" ? (
-              <div className="h-full w-full border border-dashed border-[#1a2e2e] rounded-md flex items-center justify-center">
-                <span className="text-[11px] font-bold text-[#7f8c8d] uppercase tracking-[0.16em]">
-                  No Synthetic Positions For Now
-                </span>
+              <div className="h-full w-full border border-dashed border-[#1a2e2e] rounded-md p-3">
+                <div className="grid grid-cols-[1.5fr_1fr_1fr_1fr_1fr] gap-2 items-center px-2 py-1 text-[9px] font-bold uppercase tracking-[0.12em] text-[#7f8c8d] border-b border-[#1a2e2e]">
+                  <div>Asset</div>
+                  <div>Units</div>
+                  <div>Entry</div>
+                  <div>Mark</div>
+                  <div>PnL</div>
+                </div>
+                {visibleSyntheticPositions.length ? (
+                  <div className="space-y-2 mt-2">
+                    {visibleSyntheticPositions.map((position) => (
+                      (() => {
+                        const liveMark =
+                          (tickerPrices[position.ticker] || position.markPrice) as number;
+                        const displayedPnl =
+                          position.units * liveMark - position.investedAmount;
+                        return (
+                      <div
+                        key={position.id}
+                        className="grid grid-cols-[1.5fr_1fr_1fr_1fr_1fr] gap-2 items-center px-2 py-2 border border-[#1a2e2e] rounded-md text-[10px] uppercase font-bold tracking-[0.08em]"
+                      >
+                        <div className="text-white">{position.ticker}/USD</div>
+                        <div className="text-[#7f8c8d]">{position.units.toFixed(4)}</div>
+                        <div className="text-[#7f8c8d]">${position.avgEntryPrice.toFixed(3)}</div>
+                        <div className="text-[#7f8c8d]">${liveMark.toFixed(3)}</div>
+                        <div
+                          className={
+                            displayedPnl >= 0 ? "text-[#2ed3b7]" : "text-rose-500"
+                          }
+                        >
+                          {displayedPnl >= 0 ? "+" : ""}
+                          {displayedPnl.toFixed(2)}
+                        </div>
+                      </div>
+                        );
+                      })()
+                    ))}
+                  </div>
+                ) : (
+                  <div className="h-[calc(100%-28px)] flex items-center justify-center">
+                    <span className="text-[11px] font-bold text-[#7f8c8d] uppercase tracking-[0.16em]">
+                      No Synthetic Positions For Now
+                    </span>
+                  </div>
+                )}
               </div>
             ) : positionsTab === "PREDICTION" ? (
-              predictionPortfolio.openPositions.length ? (
+              visiblePredictionPositions.length ? (
                 <div className="space-y-2">
-                  {predictionPortfolio.openPositions.map((position) => (
+                  <div className="grid grid-cols-[1.6fr_1fr_1fr_1fr_1fr_1.2fr] gap-2 items-center px-3 py-1 text-[9px] font-bold uppercase tracking-[0.12em] text-[#7f8c8d] border-b border-[#1a2e2e]">
+                    <div>Market</div>
+                    <div>Contracts</div>
+                    <div>Entry</div>
+                    <div>Current</div>
+                    <div>PnL</div>
+                    <div className="text-right">Status</div>
+                  </div>
+                  {visiblePredictionPositions.map((position) => (
                     <div
                       key={position.id}
                       className="grid grid-cols-[1.6fr_1fr_1fr_1fr_1fr_1.2fr] gap-2 items-center px-3 py-2 border border-[#1a2e2e] rounded-md text-[10px] uppercase font-bold tracking-[0.08em]"
@@ -827,7 +958,7 @@ const App: React.FC = () => {
                           : `T-${position.sessionsToSettlement ?? 0}`}
                       </div>
                     </div>
-                  ))}
+                    ))}
                 </div>
               ) : (
                 <div className="h-full w-full border border-dashed border-[#1a2e2e] rounded-md flex items-center justify-center">
@@ -836,9 +967,22 @@ const App: React.FC = () => {
                   </span>
                 </div>
               )
-            ) : predictionPortfolio.orderHistory.length ? (
+            ) : (currentView === "SYNTHETIC"
+              ? syntheticPortfolio.orderHistory.length
+              : predictionPortfolio.orderHistory.length) ? (
               <div className="space-y-2">
-                {predictionPortfolio.orderHistory.map((order) => (
+                <div className="grid grid-cols-[0.9fr_1.4fr_0.8fr_1fr_1fr_1fr_1fr] gap-2 items-center px-3 py-1 text-[9px] font-bold uppercase tracking-[0.12em] text-[#7f8c8d] border-b border-[#1a2e2e]">
+                  <div>Type</div>
+                  <div>Market</div>
+                  <div>{currentView === "SYNTHETIC" ? "Units" : "Contracts"}</div>
+                  <div>Price</div>
+                  <div>Amount</div>
+                  <div>PnL</div>
+                  <div className="text-right">Time</div>
+                </div>
+                {(currentView === "SYNTHETIC"
+                  ? syntheticPortfolio.orderHistory
+                  : predictionPortfolio.orderHistory).map((order) => (
                   <div
                     key={order.id}
                     className="grid grid-cols-[0.9fr_1.4fr_0.8fr_1fr_1fr_1fr_1fr] gap-2 items-center px-3 py-2 border border-[#1a2e2e] rounded-md text-[10px] uppercase font-bold tracking-[0.08em]"
@@ -855,11 +999,18 @@ const App: React.FC = () => {
                       {order.type}
                     </div>
                     <div className="text-white">
-                      {order.ticker} {order.outcome}
+                      {order.ticker}{" "}
+                      {"outcome" in order ? order.outcome : ""}
                     </div>
-                    <div className="text-[#7f8c8d]">{order.contracts.toFixed(2)}</div>
+                    <div className="text-[#7f8c8d]">
+                      {"contracts" in order
+                        ? order.contracts.toFixed(2)
+                        : (order as SyntheticOrder).units.toFixed(4)}
+                    </div>
                     <div className="text-[#7f8c8d]">${order.price.toFixed(3)}</div>
-                    <div className="text-[#7f8c8d]">${order.amount.toFixed(2)}</div>
+                    <div className="text-[#7f8c8d]">
+                      ${order.amount.toFixed(2)}
+                    </div>
                     <div
                       className={
                         order.realizedPnl >= 0 ? "text-[#2ed3b7]" : "text-rose-500"
@@ -880,7 +1031,7 @@ const App: React.FC = () => {
             ) : (
               <div className="h-full w-full border border-dashed border-[#1a2e2e] rounded-md flex items-center justify-center">
                 <span className="text-[11px] font-bold text-[#7f8c8d] uppercase tracking-[0.16em]">
-                  No Prediction Orders Yet
+                  No {currentView === "SYNTHETIC" ? "Synthetic" : "Prediction"} Orders Yet
                 </span>
               </div>
             )}
@@ -959,3 +1110,5 @@ const App: React.FC = () => {
 };
 
 export default App;
+
+

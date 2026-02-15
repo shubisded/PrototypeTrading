@@ -20,12 +20,10 @@ const MarketChart: React.FC<Props> = ({
   tickerPrices = {},
 }) => {
   const [isOpen, setIsOpen] = React.useState(false);
-  const tickers = ["DDR5", "DDR4", "GDDR5", "GDDR6"];
+  const tickers = ["DDR5", "DDR6"];
   const ramNames: Record<string, string> = {
     DDR5: "LIVE DDR5 SPOT",
-    DDR4: "LIVE DDR4 SPOT",
-    GDDR5: "LIVE GDDR5 SPOT",
-    GDDR6: "LIVE GDDR6 SPOT",
+    DDR6: "LIVE DDR6 SPOT",
   };
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -357,3 +355,4 @@ const MarketChart: React.FC<Props> = ({
 };
 
 export default MarketChart;
+

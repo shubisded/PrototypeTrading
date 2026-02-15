@@ -15,6 +15,7 @@ const TradeCard: React.FC<Props> = ({
   forcedOutcome = null,
   onTradeExecuted,
 }) => {
+  const SELL_EPSILON = 0.01;
   const [tradeType, setTradeType] = useState<"BUY" | "SELL">("BUY");
   const [outcome, setOutcome] = useState<"YES" | "NO">("YES");
   const [amount, setAmount] = useState("100");
@@ -25,6 +26,7 @@ const TradeCard: React.FC<Props> = ({
   const [tradeError, setTradeError] = useState<string>("");
   const [tradeToast, setTradeToast] = useState<string>("");
   const [showTradeConfirm, setShowTradeConfirm] = useState(false);
+  const [sellPercent, setSellPercent] = useState(0);
   const guestId = getOrCreateGuestId();
 
   useEffect(() => {
@@ -36,8 +38,11 @@ const TradeCard: React.FC<Props> = ({
       .then((r) => r.json())
       .then((data) => {
         if (!data?.account) return;
+        const parsedCash = Number(data.account.cashBalance);
         setAvailableBalance(
-          Number(data.account.cashBalance) || INITIAL_CASH_BALANCE,
+          Number.isFinite(parsedCash)
+            ? Math.max(0, parsedCash)
+            : INITIAL_CASH_BALANCE,
         );
       })
       .catch(() => {
@@ -78,7 +83,8 @@ const TradeCard: React.FC<Props> = ({
           ) => sum + (Number(position.contracts) || 0),
           0,
         );
-      setAvailableContracts(parseFloat(owned.toFixed(2)));
+      const normalizedOwned = parseFloat(owned.toFixed(4));
+      setAvailableContracts(normalizedOwned);
     } catch {
       // Keep previous value if backend is unavailable.
     }
@@ -106,6 +112,15 @@ const TradeCard: React.FC<Props> = ({
   }, [forcedOutcome, market.id]);
 
   useEffect(() => {
+    setTradeError("");
+    if (tradeType === "BUY") {
+      setSellPercent(0);
+      return;
+    }
+    setAmount("0");
+  }, [tradeType, market.id, outcome]);
+
+  useEffect(() => {
     void refreshAvailableContracts(market.id, outcome);
   }, [market.id, outcome]);
 
@@ -113,12 +128,12 @@ const TradeCard: React.FC<Props> = ({
     if (tradeType !== "SELL") return;
     const current = Number(amount);
     if (!Number.isFinite(current)) return;
-    if (current > availableContracts) {
+    if (current > availableContracts + SELL_EPSILON) {
       setTradeError("Cannot sell more than owned contracts");
     } else if (tradeError === "Cannot sell more than owned contracts") {
       setTradeError("");
     }
-  }, [tradeType, amount, availableContracts, tradeError]);
+  }, [tradeType, amount, availableContracts, tradeError, SELL_EPSILON]);
 
   const sharePrice =
     outcome === "YES"
@@ -144,6 +159,18 @@ const TradeCard: React.FC<Props> = ({
         detail: { text, tone },
       }),
     );
+  };
+
+  const applySellPercent = (percent: number) => {
+    const safePercent = Math.max(0, Math.min(100, Math.round(percent)));
+    setSellPercent(safePercent);
+    if (safePercent === 100) {
+      setAmount(availableContracts.toFixed(4));
+      return;
+    }
+    const rawContracts = (availableContracts * safePercent) / 100;
+    const roundedContracts = Math.floor(rawContracts);
+    setAmount(String(Math.max(0, roundedContracts)));
   };
 
   const executeTrade = async () => {
@@ -183,8 +210,10 @@ const TradeCard: React.FC<Props> = ({
         return;
       }
 
-      const nextCash =
-        Number(data.account.cashBalance) || INITIAL_CASH_BALANCE;
+      const parsedCash = Number(data.account.cashBalance);
+      const nextCash = Number.isFinite(parsedCash)
+        ? Math.max(0, parsedCash)
+        : INITIAL_CASH_BALANCE;
       setAvailableBalance(nextCash);
       window.dispatchEvent(
         new CustomEvent("accountUpdated", {
@@ -203,6 +232,8 @@ const TradeCard: React.FC<Props> = ({
         setTradeToast(
           `${outcome} contracts sold: ${contractsToSell.toFixed(2)} contracts`,
         );
+        setSellPercent(0);
+        setAmount("0");
       }
       void refreshAvailableContracts(market.id, outcome);
       if (onTradeExecuted) onTradeExecuted();
@@ -215,7 +246,7 @@ const TradeCard: React.FC<Props> = ({
 
   const handleConfirmTrade = () => {
     if (!canSubmit) return;
-    if (tradeType === "SELL" && numericAmount > availableContracts) {
+    if (tradeType === "SELL" && numericAmount > availableContracts + SELL_EPSILON) {
       setTradeError("Cannot sell more than owned contracts");
       emitSideNotice("Sell rejected: not enough contracts", "BAD");
       return;
@@ -333,6 +364,7 @@ const TradeCard: React.FC<Props> = ({
               onChange={(e) => {
                 const nextRaw = e.target.value;
                 if (tradeType === "BUY") {
+                  setSellPercent(0);
                   setAmount(nextRaw);
                   return;
                 }
@@ -345,8 +377,15 @@ const TradeCard: React.FC<Props> = ({
                   setAmount("0");
                   return;
                 }
+                if (nextNumeric > availableContracts) {
+                  setTradeError("Cannot sell more than owned contracts");
+                } else if (tradeError === "Cannot sell more than owned contracts") {
+                  setTradeError("");
+                }
+                setSellPercent(0);
                 setAmount(nextRaw);
               }}
+              onWheel={(e) => (e.target as HTMLInputElement).blur()}
               className={`w-full bg-[#040b0b] border border-[#1a2e2e] p-4 text-4xl font-bold text-white focus:outline-none transition-all rounded-xl pr-12 ${
                 tradeType === "BUY"
                   ? "focus:border-[#2ed3b7]"
@@ -357,6 +396,46 @@ const TradeCard: React.FC<Props> = ({
               {tradeType === "BUY" ? "$" : "cts"}
             </span>
           </div>
+          {tradeType === "SELL" ? (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-[9px] font-bold uppercase tracking-[0.14em] text-[#7f8c8d]">
+                  Sell %
+                </span>
+                <span className="text-[9px] font-bold uppercase tracking-[0.14em] text-rose-400">
+                  {sellPercent}%
+                </span>
+              </div>
+              <input
+                type="range"
+                min={0}
+                max={100}
+                step={1}
+                value={sellPercent}
+                onChange={(e) => applySellPercent(Number(e.target.value))}
+                className="w-full accent-rose-500"
+              />
+              <div className="grid grid-cols-4 gap-2">
+                {[25, 50, 75, 100].map((pct) => (
+                  <button
+                    key={pct}
+                    type="button"
+                    onClick={() => applySellPercent(pct)}
+                    className="h-8 rounded-md border border-[#2e1a1a] text-[10px] font-bold uppercase tracking-[0.12em] text-rose-300 hover:bg-[#1f1313]"
+                  >
+                    {pct}%
+                  </button>
+                ))}
+              </div>
+              <button
+                type="button"
+                onClick={() => setAmount(availableContracts.toFixed(4))}
+                className="w-full h-8 rounded-md border border-[#2e1a1a] text-[10px] font-bold uppercase tracking-[0.12em] text-rose-300 hover:bg-[#1f1313]"
+              >
+                MAX
+              </button>
+            </div>
+          ) : null}
         </div>
 
         {/* Summary Details */}

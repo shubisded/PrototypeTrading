@@ -26,7 +26,6 @@ const Navbar: React.FC<Props> = ({ onHome }) => {
   const [showToast, setShowToast] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
 
-  const totalCashView = cashBalance + portfolioPnL;
   const apiBase = getBackendBaseURL();
   const guestId = getOrCreateGuestId();
 
@@ -37,10 +36,14 @@ const Navbar: React.FC<Props> = ({ onHome }) => {
       .then((r) => r.json())
       .then((data) => {
         if (!data?.account) return;
-        const nextCash =
-          Number(data.account.cashBalance) || INITIAL_CASH_BALANCE;
-        const nextPortfolio =
-          Number(data.account.portfolioPnL) || INITIAL_PORTFOLIO_PNL;
+        const parsedCash = Number(data.account.cashBalance);
+        const parsedPortfolio = Number(data.account.portfolioPnL);
+        const nextCash = Number.isFinite(parsedCash)
+          ? Math.max(0, parsedCash)
+          : INITIAL_CASH_BALANCE;
+        const nextPortfolio = Number.isFinite(parsedPortfolio)
+          ? parsedPortfolio
+          : INITIAL_PORTFOLIO_PNL;
         const nextUsername = data.account.username || "DEMO";
         setCashBalance(nextCash);
         setPortfolioPnL(nextPortfolio);
@@ -98,9 +101,14 @@ const Navbar: React.FC<Props> = ({ onHome }) => {
       const data = await response.json();
       if (!data?.account) return;
 
-      const nextCash = Number(data.account.cashBalance) || INITIAL_CASH_BALANCE;
-      const nextPortfolio =
-        Number(data.account.portfolioPnL) || INITIAL_PORTFOLIO_PNL;
+      const parsedCash = Number(data.account.cashBalance);
+      const parsedPortfolio = Number(data.account.portfolioPnL);
+      const nextCash = Number.isFinite(parsedCash)
+        ? Math.max(0, parsedCash)
+        : INITIAL_CASH_BALANCE;
+      const nextPortfolio = Number.isFinite(parsedPortfolio)
+        ? parsedPortfolio
+        : INITIAL_PORTFOLIO_PNL;
       const nextUsername = data.account.username || "DEMO";
       setCashBalance(nextCash);
       setPortfolioPnL(nextPortfolio);
@@ -165,7 +173,7 @@ const Navbar: React.FC<Props> = ({ onHome }) => {
               Cash
             </p>
             <p className="text-[13px] font-bold leading-tight mt-1 text-white">
-              ${totalCashView.toFixed(2)}
+              ${cashBalance.toFixed(2)}
             </p>
           </div>
         </div>

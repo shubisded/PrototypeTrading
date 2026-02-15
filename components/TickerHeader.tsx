@@ -24,7 +24,7 @@ const TickerHeader: React.FC<Props> = ({
   className = "",
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const tickers = ["DDR5", "DDR4", "GDDR5", "GDDR6"];
+  const tickers = ["DDR5", "DDR6"];
 
   // Calculate stats from price history
   const calculateStats = () => {
@@ -185,3 +185,4 @@ const TickerHeader: React.FC<Props> = ({
 };
 
 export default TickerHeader;
+

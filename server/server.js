@@ -14,38 +14,26 @@ const SESSION_STATE_FILE = path.join(__dirname, "sessionState.json");
 
 const BASE_TICKER_PRICES = {
   DDR5: 38.067,
-  DDR4: 78.409,
-  GDDR5: 9.409,
-  GDDR6: 9.654,
+  DDR6: 9.654,
 };
 
 const MARKET_IDS_BY_TICKER = {
   DDR5: ["1", "2"],
-  DDR4: ["3", "4"],
-  GDDR6: ["5", "6"],
-  GDDR5: ["7", "8"],
+  DDR6: ["3", "4"],
 };
 
 const DEFAULT_MARKET_CHANCES = {
   "1": 64,
   "2": 42,
-  "3": 21,
-  "4": 35,
-  "5": 78,
-  "6": 52,
-  "7": 55,
-  "8": 48,
+  "3": 78,
+  "4": 52,
 };
 
 const MARKET_DEFINITIONS = {
   "1": { category: "DDR5", ticker: "DDR5-AUG-F", period: "MONTHLY" },
   "2": { category: "DDR5", ticker: "DDR5-DAILY", period: "DAILY" },
-  "3": { category: "DDR4", ticker: "DDR4-AUG-F", period: "MONTHLY" },
-  "4": { category: "DDR4", ticker: "DDR4-DAILY", period: "DAILY" },
-  "5": { category: "GDDR6", ticker: "G6-AUG-F", period: "MONTHLY" },
-  "6": { category: "GDDR6", ticker: "G6-DAILY", period: "DAILY" },
-  "7": { category: "GDDR5", ticker: "G5-AUG-F", period: "MONTHLY" },
-  "8": { category: "GDDR5", ticker: "G5-DAILY", period: "DAILY" },
+  "3": { category: "DDR6", ticker: "DDR6-AUG-F", period: "MONTHLY" },
+  "4": { category: "DDR6", ticker: "DDR6-DAILY", period: "DAILY" },
 };
 
 const isAllowedDevOrigin = (origin) => {
@@ -84,6 +72,8 @@ app.use(
 app.use(express.json());
 
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+const toFiniteNumber = (value, fallback = 0) =>
+  Number.isFinite(Number(value)) ? Number(value) : fallback;
 
 const loadJsonFile = (filePath) => {
   try {
@@ -474,6 +464,12 @@ const buildDefaultGuestAccount = () => ({
   username: "DEMO",
   cashBalance: 1240,
   portfolioPnL: 0,
+  synthetic: {
+    nextPositionId: 1,
+    nextOrderId: 1,
+    openPositions: [],
+    orderHistory: [],
+  },
   prediction: {
     realizedPnL: 0,
     nextPositionId: 1,
@@ -492,6 +488,98 @@ const buildDefaultPredictionState = () => ({
   openPositions: [],
   orderHistory: [],
 });
+
+const buildDefaultSyntheticState = () => ({
+  nextPositionId: 1,
+  nextOrderId: 1,
+  openPositions: [],
+  orderHistory: [],
+});
+
+const sanitizeSyntheticState = (raw) => {
+  const base = buildDefaultSyntheticState();
+  if (!raw || typeof raw !== "object") return base;
+
+  const openPositions = Array.isArray(raw.openPositions)
+    ? raw.openPositions
+        .map((position) => {
+          const ticker = String(position?.ticker || "");
+          if (!BASE_TICKER_PRICES[ticker]) return null;
+          const units = Number(position?.units);
+          const avgEntryPrice = Number(position?.avgEntryPrice);
+          const investedAmount = Number(position?.investedAmount);
+          if (
+            !Number.isFinite(units) ||
+            units <= 0 ||
+            !Number.isFinite(avgEntryPrice) ||
+            avgEntryPrice <= 0 ||
+            !Number.isFinite(investedAmount) ||
+            investedAmount <= 0
+          ) {
+            return null;
+          }
+          return {
+            id: Number(position?.id) || 0,
+            ticker,
+            units: parseFloat(units.toFixed(6)),
+            avgEntryPrice: parseFloat(avgEntryPrice.toFixed(4)),
+            investedAmount: parseFloat(investedAmount.toFixed(4)),
+            createdAt: position?.createdAt || new Date().toISOString(),
+            updatedAt: position?.updatedAt || new Date().toISOString(),
+          };
+        })
+        .filter(Boolean)
+    : [];
+
+  const orderHistory = Array.isArray(raw.orderHistory)
+    ? raw.orderHistory
+        .map((order) => {
+          const ticker = String(order?.ticker || "");
+          if (!BASE_TICKER_PRICES[ticker]) return null;
+          const type = order?.type === "SELL" ? "SELL" : "BUY";
+          const units = Number(order?.units) || 0;
+          const price = Number(order?.price) || 0;
+          const amount = Number(order?.amount) || 0;
+          const realizedPnl = Number(order?.realizedPnl) || 0;
+          return {
+            id: Number(order?.id) || 0,
+            type,
+            ticker,
+            units: parseFloat(units.toFixed(6)),
+            price: parseFloat(price.toFixed(4)),
+            amount: parseFloat(amount.toFixed(4)),
+            realizedPnl: parseFloat(realizedPnl.toFixed(4)),
+            createdAt: order?.createdAt || new Date().toISOString(),
+          };
+        })
+        .filter(Boolean)
+    : [];
+
+  const maxPositionId = openPositions.reduce(
+    (max, position) => Math.max(max, Number(position.id) || 0),
+    0,
+  );
+  const maxOrderId = orderHistory.reduce(
+    (max, order) => Math.max(max, Number(order.id) || 0),
+    0,
+  );
+
+  return {
+    nextPositionId: Math.max(Number(raw.nextPositionId) || 1, maxPositionId + 1),
+    nextOrderId: Math.max(Number(raw.nextOrderId) || 1, maxOrderId + 1),
+    openPositions,
+    orderHistory: orderHistory.slice(-500),
+  };
+};
+
+const getSyntheticQuote = (ticker) => {
+  const current = Number(centralPrices[ticker]) || Number(BASE_TICKER_PRICES[ticker]) || 0;
+  return {
+    ask: current,
+    bid: current,
+    mark: current,
+  };
+};
 
 const sanitizePredictionState = (raw) => {
   const base = buildDefaultPredictionState();
@@ -610,24 +698,36 @@ const getCurrentContractPrice = (marketId, outcome) => {
 
 const recalculatePortfolioPnL = (account) => {
   const prediction = account.prediction || buildDefaultPredictionState();
-  const unrealized = prediction.openPositions.reduce((sum, position) => {
+  const synthetic = account.synthetic || buildDefaultSyntheticState();
+
+  const predictionUnrealized = prediction.openPositions.reduce((sum, position) => {
     const currentPrice = getCurrentContractPrice(position.marketId, position.outcome);
     const markValue = position.contracts * currentPrice;
     return sum + (markValue - position.investedAmount);
   }, 0);
 
+  const syntheticUnrealized = synthetic.openPositions.reduce((sum, position) => {
+    const quote = getSyntheticQuote(position.ticker);
+    const mark = quote.ask;
+    const markValue = position.units * mark;
+    return sum + (markValue - position.investedAmount);
+  }, 0);
+
   // Keep account.portfolioPnL as unrealized PnL only.
   // Realized PnL is already reflected in cash balance via fills/settlements.
-  account.portfolioPnL = parseFloat(unrealized.toFixed(2));
+  account.portfolioPnL = parseFloat((predictionUnrealized + syntheticUnrealized).toFixed(2));
   return account.portfolioPnL;
 };
 
 const ensureAccountShape = (account) => {
   if (!account || typeof account !== "object") return buildDefaultGuestAccount();
+  const nextCash = Math.max(0, toFiniteNumber(account.cashBalance, 1240));
+  const nextPortfolio = toFiniteNumber(account.portfolioPnL, 0);
   const normalized = {
     username: account.username || "DEMO",
-    cashBalance: Number(account.cashBalance) || 1240,
-    portfolioPnL: Number(account.portfolioPnL) || 0,
+    cashBalance: parseFloat(nextCash.toFixed(2)),
+    portfolioPnL: parseFloat(nextPortfolio.toFixed(2)),
+    synthetic: sanitizeSyntheticState(account.synthetic),
     prediction: sanitizePredictionState(account.prediction),
     createdAt: account.createdAt || new Date().toISOString(),
     updatedAt: account.updatedAt || new Date().toISOString(),
@@ -694,6 +794,159 @@ const buildPredictionSnapshot = (account) => {
   };
 };
 
+const buildSyntheticSnapshot = (account) => {
+  const synthetic = account.synthetic || buildDefaultSyntheticState();
+  const openPositions = synthetic.openPositions.map((position) => {
+    const quote = getSyntheticQuote(position.ticker);
+    const markPrice = quote.ask;
+    const marketValue = position.units * markPrice;
+    const pnl = marketValue - position.investedAmount;
+    return {
+      ...position,
+      markPrice: parseFloat(markPrice.toFixed(4)),
+      marketValue: parseFloat(marketValue.toFixed(2)),
+      pnl: parseFloat(pnl.toFixed(2)),
+    };
+  });
+
+  const totals = openPositions.reduce(
+    (acc, position) => {
+      acc.units += position.units;
+      acc.invested += position.investedAmount;
+      acc.marketValue += position.marketValue;
+      acc.unrealizedPnl += position.pnl;
+      return acc;
+    },
+    { units: 0, invested: 0, marketValue: 0, unrealizedPnl: 0 },
+  );
+
+  return {
+    openPositions,
+    orderHistory: synthetic.orderHistory,
+    totals: {
+      units: parseFloat(totals.units.toFixed(6)),
+      invested: parseFloat(totals.invested.toFixed(2)),
+      marketValue: parseFloat(totals.marketValue.toFixed(2)),
+      unrealizedPnl: parseFloat(totals.unrealizedPnl.toFixed(2)),
+    },
+  };
+};
+
+const executeSyntheticTrade = ({ account, side, ticker, amount }) => {
+  if (!BASE_TICKER_PRICES[ticker]) {
+    return { ok: false, error: "Invalid ticker" };
+  }
+  const usdAmount = Number(amount);
+  if (!Number.isFinite(usdAmount) || usdAmount <= 0) {
+    return { ok: false, error: "Invalid amount" };
+  }
+
+  const synthetic = account.synthetic;
+  const quote = getSyntheticQuote(ticker);
+  const nowIso = new Date().toISOString();
+
+  if (side === "BUY") {
+    if (usdAmount > account.cashBalance) {
+      return { ok: false, error: "Insufficient cash balance" };
+    }
+    const units = usdAmount / quote.ask;
+    synthetic.openPositions.push({
+      id: synthetic.nextPositionId++,
+      ticker,
+      units: parseFloat(units.toFixed(6)),
+      avgEntryPrice: parseFloat(quote.ask.toFixed(4)),
+      investedAmount: parseFloat(usdAmount.toFixed(4)),
+      createdAt: nowIso,
+      updatedAt: nowIso,
+    });
+    account.cashBalance = parseFloat(
+      Math.max(0, account.cashBalance - usdAmount).toFixed(2),
+    );
+    synthetic.orderHistory.unshift({
+      id: synthetic.nextOrderId++,
+      type: "BUY",
+      ticker,
+      units: parseFloat(units.toFixed(6)),
+      price: parseFloat(quote.ask.toFixed(4)),
+      amount: parseFloat(usdAmount.toFixed(4)),
+      realizedPnl: 0,
+      createdAt: nowIso,
+    });
+  } else if (side === "SELL") {
+    const totalOwnedUnits = synthetic.openPositions
+      .filter((position) => position.ticker === ticker)
+      .reduce((sum, position) => sum + position.units, 0);
+    const requestedUnits = usdAmount / quote.bid;
+    const EPS = 1e-4;
+    if (requestedUnits > totalOwnedUnits + EPS) {
+      return { ok: false, error: "Insufficient units to sell" };
+    }
+
+    let remainingUnits = Math.min(requestedUnits, totalOwnedUnits);
+    let removedCost = 0;
+    let soldUnits = 0;
+    const nextOpenPositions = [];
+
+    synthetic.openPositions.forEach((position) => {
+      if (position.ticker !== ticker || remainingUnits <= 0) {
+        nextOpenPositions.push(position);
+        return;
+      }
+      const used = Math.min(remainingUnits, position.units);
+      const ratio = used / position.units;
+      const costPortion = position.investedAmount * ratio;
+      soldUnits += used;
+      removedCost += costPortion;
+      remainingUnits -= used;
+
+      const leftUnits = position.units - used;
+      const leftInvested = position.investedAmount - costPortion;
+      if (leftUnits > 1e-4) {
+        nextOpenPositions.push({
+          ...position,
+          units: parseFloat(leftUnits.toFixed(6)),
+          investedAmount: parseFloat(leftInvested.toFixed(4)),
+          avgEntryPrice: parseFloat((leftInvested / leftUnits).toFixed(4)),
+          updatedAt: nowIso,
+        });
+      }
+    });
+
+    if (soldUnits <= 0 || remainingUnits > 1e-4) {
+      return { ok: false, error: "Insufficient units to sell" };
+    }
+
+    synthetic.openPositions = nextOpenPositions;
+    const proceeds = soldUnits * quote.bid;
+    const realizedPnl = proceeds - removedCost;
+    account.cashBalance = parseFloat(
+      Math.max(0, account.cashBalance + proceeds).toFixed(2),
+    );
+    synthetic.orderHistory.unshift({
+      id: synthetic.nextOrderId++,
+      type: "SELL",
+      ticker,
+      units: parseFloat(soldUnits.toFixed(6)),
+      price: parseFloat(quote.bid.toFixed(4)),
+      amount: parseFloat(proceeds.toFixed(4)),
+      realizedPnl: parseFloat(realizedPnl.toFixed(4)),
+      createdAt: nowIso,
+    });
+  } else {
+    return { ok: false, error: "Invalid side" };
+  }
+
+  synthetic.orderHistory = synthetic.orderHistory.slice(0, 500);
+  account.updatedAt = nowIso;
+  recalculatePortfolioPnL(account);
+  saveJsonFile(ACCOUNT_FILE, accountStore);
+  return {
+    ok: true,
+    account,
+    synthetic: buildSyntheticSnapshot(account),
+  };
+};
+
 const sanitizeGuestId = (value) => {
   if (typeof value !== "string") return null;
   const cleaned = value.trim();
@@ -711,8 +964,12 @@ if (loadedAccountData?.accounts && typeof loadedAccountData.accounts === "object
 } else if (loadedAccountData?.cashBalance !== undefined) {
   accountStore.accounts["guest-default"] = {
     username: loadedAccountData.username || "DEMO",
-    cashBalance: Number(loadedAccountData.cashBalance) || 1240,
-    portfolioPnL: Number(loadedAccountData.portfolioPnL) || 0,
+    cashBalance: parseFloat(
+      Math.max(0, toFiniteNumber(loadedAccountData.cashBalance, 1240)).toFixed(2),
+    ),
+    portfolioPnL: parseFloat(
+      toFiniteNumber(loadedAccountData.portfolioPnL, 0).toFixed(2),
+    ),
     createdAt: loadedAccountData.createdAt || new Date().toISOString(),
     updatedAt: loadedAccountData.updatedAt || new Date().toISOString(),
   };
@@ -793,7 +1050,9 @@ const executePredictionTrade = ({
     };
 
     prediction.openPositions.push(position);
-    account.cashBalance = parseFloat((account.cashBalance - buyAmount).toFixed(2));
+    account.cashBalance = parseFloat(
+      Math.max(0, account.cashBalance - buyAmount).toFixed(2),
+    );
 
     appendOrderHistory(account, {
       type: "BUY",
@@ -814,7 +1073,19 @@ const executePredictionTrade = ({
       return { ok: false, error: "Invalid contracts to sell" };
     }
 
-    let remaining = contractsToSell;
+    const matchingTotalContracts = prediction.openPositions
+      .filter(
+        (position) =>
+          position.marketId === marketId && position.outcome === outcome,
+      )
+      .reduce((sum, position) => sum + position.contracts, 0);
+    const SELL_EPSILON = 0.01;
+    if (contractsToSell > matchingTotalContracts + SELL_EPSILON) {
+      return { ok: false, error: "Not enough contracts to sell" };
+    }
+
+    const targetContracts = Math.min(contractsToSell, matchingTotalContracts);
+    let remaining = targetContracts;
     let removedCost = 0;
     let soldContracts = 0;
     const nextOpenPositions = [];
@@ -839,7 +1110,7 @@ const executePredictionTrade = ({
 
       const leftContracts = position.contracts - used;
       const leftInvested = position.investedAmount - costPortion;
-      if (leftContracts > 0.000001) {
+      if (leftContracts > SELL_EPSILON) {
         nextOpenPositions.push({
           ...position,
           contracts: parseFloat(leftContracts.toFixed(4)),
@@ -850,14 +1121,16 @@ const executePredictionTrade = ({
       }
     });
 
-    if (soldContracts <= 0 || remaining > 0.000001) {
+    if (soldContracts <= 0 || remaining > SELL_EPSILON) {
       return { ok: false, error: "Not enough contracts to sell" };
     }
 
     prediction.openPositions = nextOpenPositions;
     const proceeds = soldContracts * price;
     const realizedPnl = proceeds - removedCost;
-    account.cashBalance = parseFloat((account.cashBalance + proceeds).toFixed(2));
+    account.cashBalance = parseFloat(
+      Math.max(0, account.cashBalance + proceeds).toFixed(2),
+    );
     prediction.realizedPnL = parseFloat(
       (Number(prediction.realizedPnL || 0) + realizedPnl).toFixed(4),
     );
@@ -1019,6 +1292,7 @@ app.get("/api/account", (req, res) => {
   res.json({
     guestId,
     account,
+    synthetic: buildSyntheticSnapshot(account),
     prediction: buildPredictionSnapshot(account),
     timestamp: Date.now(),
   });
@@ -1034,7 +1308,9 @@ app.post("/api/account/deposit", (req, res) => {
     return;
   }
 
-  account.cashBalance = parseFloat((account.cashBalance + amount).toFixed(2));
+  account.cashBalance = parseFloat(
+    Math.max(0, account.cashBalance + amount).toFixed(2),
+  );
   account.updatedAt = new Date().toISOString();
   recalculatePortfolioPnL(account);
   saveJsonFile(ACCOUNT_FILE, accountStore);
@@ -1043,6 +1319,7 @@ app.post("/api/account/deposit", (req, res) => {
     success: true,
     guestId,
     account,
+    synthetic: buildSyntheticSnapshot(account),
     prediction: buildPredictionSnapshot(account),
     deposited: amount,
     timestamp: Date.now(),
@@ -1069,6 +1346,47 @@ app.get("/api/prediction/portfolio", (req, res) => {
     guestId,
     account,
     prediction: buildPredictionSnapshot(account),
+    timestamp: Date.now(),
+  });
+});
+
+app.get("/api/synthetic/portfolio", (req, res) => {
+  const guestId = resolveGuestId(req);
+  const account = getOrCreateGuestAccount(guestId);
+  recalculatePortfolioPnL(account);
+  saveJsonFile(ACCOUNT_FILE, accountStore);
+
+  res.json({
+    success: true,
+    guestId,
+    account,
+    synthetic: buildSyntheticSnapshot(account),
+    timestamp: Date.now(),
+  });
+});
+
+app.post("/api/synthetic/trade", (req, res) => {
+  const guestId = resolveGuestId(req);
+  const account = getOrCreateGuestAccount(guestId);
+  const side = req.body?.side === "SELL" ? "SELL" : "BUY";
+  const ticker = String(req.body?.ticker || "");
+  const result = executeSyntheticTrade({
+    account,
+    side,
+    ticker,
+    amount: req.body?.amount,
+  });
+
+  if (!result.ok) {
+    res.status(400).json({ error: result.error || "Trade rejected" });
+    return;
+  }
+
+  res.json({
+    success: true,
+    guestId,
+    account: result.account,
+    synthetic: result.synthetic,
     timestamp: Date.now(),
   });
 });
@@ -1129,3 +1447,5 @@ httpServer.listen(PORT, () => {
   console.log(`Prices file: ${PRICES_FILE}`);
   console.log(`Account file: ${ACCOUNT_FILE}`);
 });
+
+

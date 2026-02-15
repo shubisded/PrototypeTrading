@@ -3,11 +3,9 @@
     "createdAt": "2026-02-13T00:00:00.000Z",
     "version": "1.0"
   },
-  "skipSessionCount": 9,
+  "skipSessionCount": 0,
   "priceToBeat": {
-    "DDR5": 39.97,
-    "DDR4": 77.599,
-    "GDDR5": 9.364,
-    "GDDR6": 10.109
+    "DDR5": 37.399,
+    "DDR6": 9.171
   }
 }
