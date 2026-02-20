@@ -57,6 +57,7 @@ const TickerHeader: React.FC<Props> = ({
   showSessionRemaining = true,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [nowTick, setNowTick] = useState(() => Date.now());
   const tickers = ["DDR5", "DDR4"];
 
   const calculateStats = () => {
@@ -90,32 +91,32 @@ const TickerHeader: React.FC<Props> = ({
 
   const stats = calculateStats();
 
-  const sessionProgress = useMemo(() => {
-    const anchor = getLatestAnchorDate(timeHistory);
-    const sessionIdx = getCurrentSessionIndex(anchor);
-    const completed = sessionIdx < 0 ? 0 : sessionIdx + 1;
-    const remaining = Math.max(0, SESSION_SLOTS_MINUTES.length - completed);
+  React.useEffect(() => {
+    const timer = window.setInterval(() => {
+      setNowTick(Date.now());
+    }, 30_000);
+    return () => window.clearInterval(timer);
+  }, []);
 
-    const nextDate = new Date(anchor);
-    if (sessionIdx < 0) {
-      const slotMinutes = SESSION_SLOTS_MINUTES[0];
-      nextDate.setHours(Math.floor(slotMinutes / 60), slotMinutes % 60, 0, 0);
-    } else if (sessionIdx >= SESSION_SLOTS_MINUTES.length - 1) {
-      nextDate.setDate(nextDate.getDate() + 1);
-      const slotMinutes = SESSION_SLOTS_MINUTES[0];
-      nextDate.setHours(Math.floor(slotMinutes / 60), slotMinutes % 60, 0, 0);
-    } else {
-      const slotMinutes = SESSION_SLOTS_MINUTES[sessionIdx + 1];
-      nextDate.setHours(Math.floor(slotMinutes / 60), slotMinutes % 60, 0, 0);
-    }
+  const sessionProgress = useMemo(() => {
+    const now = new Date(nowTick);
+    const minutes = now.getHours() * 60 + now.getMinutes();
+
+    // Fixed daily slots: 8:30, 12:00, 3:30.
+    let completed = 0;
+    if (minutes >= SESSION_SLOTS_MINUTES[0]) completed = 1;
+    if (minutes >= SESSION_SLOTS_MINUTES[1]) completed = 2;
+    if (minutes >= SESSION_SLOTS_MINUTES[2]) completed = 3;
+
+    const remaining = Math.max(0, SESSION_SLOTS_MINUTES.length - completed);
 
     return {
       completed,
       remaining,
       dots: SESSION_SLOTS_MINUTES.map((_, idx) => idx < remaining),
-      nextLabel: formatClock(nextDate),
+      nextLabel: "",
     };
-  }, [timeHistory]);
+  }, [nowTick]);
 
   return (
     <div
@@ -277,6 +278,9 @@ const TickerHeader: React.FC<Props> = ({
 };
 
 export default TickerHeader;
+
+
+
 
 
 
