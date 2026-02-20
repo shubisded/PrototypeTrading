@@ -315,6 +315,12 @@ const getNextSessionSlotFromIndex = (fromDate, slotIndex) => {
   return date;
 };
 
+
+
+const getSessionSlotIndex = (date) => {
+  const minutes = date.getUTCHours() * 60 + date.getUTCMinutes();
+  return SESSION_SLOTS_MINUTES.findIndex((slot) => slot === minutes);
+};
 const alignTimestampToSlotIndex = (baseDate, slotIndex) => {
   const date = new Date(baseDate);
   const safeIndex = Number.isInteger(Number(slotIndex))
@@ -1718,6 +1724,9 @@ httpServer.listen(PORT, () => {
   console.log(`Prices file: ${PRICES_FILE}`);
   console.log(`Account file: ${ACCOUNT_FILE}`);
 });
+
+
+
 
 
 
