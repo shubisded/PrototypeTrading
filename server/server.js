@@ -38,15 +38,28 @@ const MARKET_DEFINITIONS = {
 };
 const SESSION_SLOTS_MINUTES = [8 * 60 + 30, 12 * 60, 15 * 60 + 30];
 
-const isAllowedDevOrigin = (origin) => {
+const ALLOWED_ORIGINS_FROM_ENV = String(process.env.CORS_ORIGINS || "")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+const isAllowedOrigin = (origin) => {
   if (!origin) return true;
   try {
     const url = new URL(origin);
     const host = url.hostname;
+
     if (host === "localhost" || host === "127.0.0.1") return true;
     if (host.startsWith("192.168.")) return true;
     if (host.startsWith("10.")) return true;
     if (/^172\.(1[6-9]|2\d|3[0-1])\./.test(host)) return true;
+
+    // Allow common deployment hosts for this prototype.
+    if (host.endsWith(".vercel.app")) return true;
+    if (host.endsWith(".railway.app")) return true;
+
+    if (ALLOWED_ORIGINS_FROM_ENV.includes(origin)) return true;
+
     return false;
   } catch {
     return false;
@@ -58,7 +71,7 @@ const httpServer = createServer(app);
 const io = new SocketIOServer(httpServer, {
   cors: {
     origin: (origin, callback) => {
-      callback(null, isAllowedDevOrigin(origin));
+      callback(null, isAllowedOrigin(origin));
     },
     methods: ["GET", "POST"],
   },
@@ -67,7 +80,7 @@ const io = new SocketIOServer(httpServer, {
 app.use(
   cors({
     origin: (origin, callback) => {
-      callback(null, isAllowedDevOrigin(origin));
+      callback(null, isAllowedOrigin(origin));
     },
   }),
 );
@@ -1655,5 +1668,6 @@ httpServer.listen(PORT, () => {
   console.log(`Prices file: ${PRICES_FILE}`);
   console.log(`Account file: ${ACCOUNT_FILE}`);
 });
+
 
 
