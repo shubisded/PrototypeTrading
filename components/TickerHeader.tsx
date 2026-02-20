@@ -94,6 +94,7 @@ const TickerHeader: React.FC<Props> = ({
     const anchor = getLatestAnchorDate(timeHistory);
     const sessionIdx = getCurrentSessionIndex(anchor);
     const completed = sessionIdx < 0 ? 0 : sessionIdx + 1;
+    const remaining = Math.max(0, SESSION_SLOTS_MINUTES.length - completed);
 
     const nextDate = new Date(anchor);
     if (sessionIdx < 0) {
@@ -110,7 +111,8 @@ const TickerHeader: React.FC<Props> = ({
 
     return {
       completed,
-      dots: SESSION_SLOTS_MINUTES.map((_, idx) => idx < completed),
+      remaining,
+      dots: SESSION_SLOTS_MINUTES.map((_, idx) => idx < remaining),
       nextLabel: formatClock(nextDate),
     };
   }, [timeHistory]);
@@ -233,7 +235,7 @@ const TickerHeader: React.FC<Props> = ({
                 />
               ))}
               <span className="text-[10px] font-bold text-[#9fb1c5] ml-1">
-                {sessionProgress.completed}/{SESSION_SLOTS_MINUTES.length}
+                {sessionProgress.remaining}/{SESSION_SLOTS_MINUTES.length}
               </span>
 
             </div>
@@ -275,6 +277,7 @@ const TickerHeader: React.FC<Props> = ({
 };
 
 export default TickerHeader;
+
 
 
 
