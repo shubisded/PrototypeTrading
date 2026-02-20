@@ -296,22 +296,23 @@ const getPrevOrCurrentSessionSlot = (baseDate = new Date()) => {
   return date;
 };
 
-const getNextSessionSlot = (fromDate) => {
+const getNextSessionSlotFromIndex = (fromDate, slotIndex) => {
   const date = new Date(fromDate);
-  const minutes = date.getHours() * 60 + date.getMinutes();
-  const currentSlotIndex = SESSION_SLOTS_MINUTES.findIndex((slot) => slot === minutes);
+  const normalizedIndex = Number.isInteger(Number(slotIndex))
+    ? Math.max(0, Math.min(SESSION_SLOTS_MINUTES.length - 1, Number(slotIndex)))
+    : 0;
 
-  if (currentSlotIndex >= 0 && currentSlotIndex < SESSION_SLOTS_MINUTES.length - 1) {
-    const nextSlot = SESSION_SLOTS_MINUTES[currentSlotIndex + 1];
+  // Move by session sequence, independent from server timezone normalization.
+  if (normalizedIndex < SESSION_SLOTS_MINUTES.length - 1) {
+    const nextSlot = SESSION_SLOTS_MINUTES[normalizedIndex + 1];
     date.setHours(Math.floor(nextSlot / 60), nextSlot % 60, 0, 0);
     return date;
   }
 
-  const nextDay = new Date(date);
-  nextDay.setDate(nextDay.getDate() + 1);
+  date.setDate(date.getDate() + 1);
   const firstSlot = SESSION_SLOTS_MINUTES[0];
-  nextDay.setHours(Math.floor(firstSlot / 60), firstSlot % 60, 0, 0);
-  return nextDay;
+  date.setHours(Math.floor(firstSlot / 60), firstSlot % 60, 0, 0);
+  return date;
 };
 
 const getSessionSlotIndex = (date) => {
@@ -365,21 +366,20 @@ const sanitizeSessionState = (raw) => {
 
   const parsedLast = new Date(String(raw.lastSessionAt || ""));
   if (!Number.isNaN(parsedLast.getTime())) {
-    const normalized = getPrevOrCurrentSessionSlot(parsedLast);
-    next.lastSessionAt = normalized.toISOString();
-    next.lastSessionSlotIndex = getSessionSlotIndex(normalized);
+    next.lastSessionAt = parsedLast.toISOString();
+    if (!Number.isInteger(Number(raw.lastSessionSlotIndex))) {
+      const derivedIndex = getSessionSlotIndex(parsedLast);
+      next.lastSessionSlotIndex = derivedIndex >= 0 ? derivedIndex : base.lastSessionSlotIndex;
+    }
   }
 
   return next;
 };
 
 const sessionState = sanitizeSessionState(loadJsonFile(SESSION_STATE_FILE));
-sessionState.lastSessionAt = getPrevOrCurrentSessionSlot(
-  new Date(sessionState.lastSessionAt || getLatestHistoryTimestamp().toISOString()),
-).toISOString();
-sessionState.lastSessionSlotIndex = getSessionSlotIndex(
-  new Date(sessionState.lastSessionAt),
-);
+if (!Number.isInteger(Number(sessionState.lastSessionSlotIndex))) {
+  sessionState.lastSessionSlotIndex = 0;
+}
 saveJsonFile(SESSION_STATE_FILE, sessionState);
 
 const generateChanceSeedHistory = (baseChance) => {
@@ -574,7 +574,7 @@ const runSkipSessions = (sessionCount = 1, actorName = "DEMO") => {
   const tickers = Object.keys(BASE_TICKER_PRICES);
 
   for (let s = 0; s < count; s++) {
-    const nextSessionAt = getNextSessionSlot(new Date(sessionState.lastSessionAt));
+    const nextSessionAt = getNextSessionSlotFromIndex(new Date(sessionState.lastSessionAt), sessionState.lastSessionSlotIndex);
     const nextSessionIso = nextSessionAt.toISOString();
     sessionState.lastSessionAt = nextSessionIso;
     sessionState.lastSessionSlotIndex =
@@ -1668,6 +1668,7 @@ httpServer.listen(PORT, () => {
   console.log(`Prices file: ${PRICES_FILE}`);
   console.log(`Account file: ${ACCOUNT_FILE}`);
 });
+
 
 
 

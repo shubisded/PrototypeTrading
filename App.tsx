@@ -338,6 +338,14 @@ const App: React.FC = () => {
   );
   const previousViewRef = useRef<ViewState>("LANDING");
 
+  useEffect(() => {
+    if (!notices.length) return;
+    const timer = window.setTimeout(() => {
+      setNotices((prev) => prev.slice(1));
+    }, 3200);
+    return () => window.clearTimeout(timer);
+  }, [notices]);
+
   const currentPrice = tickerPrices[selectedTicker] || 0;
   const visiblePredictionPositions = predictionPortfolio.openPositions.filter(
     (position) => (hideDustPositions ? position.contracts > 0.01 : true),
@@ -1758,6 +1766,9 @@ const App: React.FC = () => {
 };
 
 export default App;
+
+
+
 
 
 
