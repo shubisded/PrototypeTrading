@@ -320,6 +320,31 @@ const getSessionSlotIndex = (date) => {
   return SESSION_SLOTS_MINUTES.findIndex((slot) => slot === minutes);
 };
 
+const reconcileSessionSlotIndexFromTimestamp = () => {
+  const parsed = new Date(String(sessionState.lastSessionAt || ""));
+  if (Number.isNaN(parsed.getTime())) return;
+
+  const exact = getSessionSlotIndex(parsed);
+  if (exact >= 0) {
+    sessionState.lastSessionSlotIndex = exact;
+    return;
+  }
+
+  // Legacy/offset safety: choose the nearest of 8:30, 12:00, 3:30.
+  const minutes = parsed.getHours() * 60 + parsed.getMinutes();
+  let bestIndex = 0;
+  let bestDistance = Number.POSITIVE_INFINITY;
+  SESSION_SLOTS_MINUTES.forEach((slot, idx) => {
+    const distance = Math.abs(slot - minutes);
+    if (distance < bestDistance) {
+      bestDistance = distance;
+      bestIndex = idx;
+    }
+  });
+
+  sessionState.lastSessionSlotIndex = bestIndex;
+};
+
 const getLatestHistoryTimestamp = () => {
   const firstTicker = Object.keys(pricesData.priceHistory)[0];
   const entries = firstTicker ? pricesData.priceHistory[firstTicker] : [];
@@ -570,6 +595,7 @@ const settleDuePredictionPositions = () => {
 };
 
 const runSkipSessions = (sessionCount = 1, actorName = "DEMO") => {
+  reconcileSessionSlotIndexFromTimestamp();
   const count = Math.max(1, Math.min(20, Number(sessionCount) || 1));
   const tickers = Object.keys(BASE_TICKER_PRICES);
 
@@ -1668,6 +1694,8 @@ httpServer.listen(PORT, () => {
   console.log(`Prices file: ${PRICES_FILE}`);
   console.log(`Account file: ${ACCOUNT_FILE}`);
 });
+
+
 
 
 
