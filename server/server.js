@@ -398,6 +398,31 @@ const getLatestHistoryTimestamp = () => {
   if (parsed && !Number.isNaN(parsed.getTime())) return parsed;
   return getPrevOrCurrentSessionSlot(new Date());
 };
+const getMonthlyTargetPrice = (ticker, referenceDate) => {
+  const series = Array.isArray(pricesData.priceHistory?.[ticker])
+    ? pricesData.priceHistory[ticker]
+    : [];
+
+  const ref = new Date(referenceDate || getLatestHistoryTimestamp().toISOString());
+  const safeRef = Number.isNaN(ref.getTime()) ? getLatestHistoryTimestamp() : ref;
+  const monthStart = new Date(
+    Date.UTC(safeRef.getUTCFullYear(), safeRef.getUTCMonth(), 1, 0, 0, 0, 0),
+  );
+
+  for (let i = 0; i < series.length; i++) {
+    const ts = new Date(series[i]?.timestamp || "");
+    if (Number.isNaN(ts.getTime())) continue;
+    if (ts >= monthStart && ts <= safeRef) {
+      const px = Number(series[i]?.price);
+      if (Number.isFinite(px) && px > 0) return px;
+    }
+  }
+
+  const latest = Number(centralPrices[ticker]);
+  if (Number.isFinite(latest) && latest > 0) return latest;
+  const base = Number(BASE_TICKER_PRICES[ticker]);
+  return Number.isFinite(base) && base > 0 ? base : 0;
+};
 const normalizePriceHistoryTimeline = () => {
   const alignedEnd = alignTimestampToSlotIndex(
     new Date(sessionState.lastSessionAt || getLatestHistoryTimestamp().toISOString()),
@@ -933,7 +958,13 @@ const sanitizePredictionState = (raw) => {
             investedAmount: parseFloat(investedAmount.toFixed(4)),
             targetPrice: Number.isFinite(targetPrice)
               ? parseFloat(targetPrice.toFixed(3))
-              : parseFloat((sessionState.priceToBeat[market.category] || 0).toFixed(3)),
+              : parseFloat(
+                  Number(
+                    market.period === "MONTHLY"
+                      ? getMonthlyTargetPrice(market.category, position?.createdAt)
+                      : sessionState.priceToBeat[market.category] || 0,
+                  ).toFixed(3),
+                ),
             openedSession: Number.isFinite(openedSession)
               ? Math.max(0, Math.floor(openedSession))
               : 0,
@@ -1377,7 +1408,13 @@ const executePredictionTrade = ({
       avgEntryPrice: parseFloat(price.toFixed(4)),
       investedAmount: parseFloat(buyAmount.toFixed(4)),
       targetPrice: parseFloat(
-        Number(sessionState.priceToBeat[market.category] || centralPrices[market.category] || 0).toFixed(3),
+        Number(
+          market.period === "MONTHLY"
+            ? getMonthlyTargetPrice(market.category, sessionState.lastSessionAt || nowIso)
+            : sessionState.priceToBeat[market.category] ||
+              centralPrices[market.category] ||
+              0,
+        ).toFixed(3),
       ),
       openedSession: sessionState.skipSessionCount,
       settlementAt:
@@ -1815,6 +1852,7 @@ httpServer.listen(PORT, () => {
   console.log(`Prices file: ${PRICES_FILE}`);
   console.log(`Account file: ${ACCOUNT_FILE}`);
 });
+
 
 
 
