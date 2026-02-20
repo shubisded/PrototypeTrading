@@ -5,41 +5,11 @@
     "description": "DRAM prices normalized around base values with bounded volatility"
   },
   "currentPrices": {
-    "DDR5": 36.164,
-    "DDR4": 81.818
+    "DDR5": 36.758,
+    "DDR4": 78.174
   },
   "priceHistory": {
     "DDR5": [
-      {
-        "price": 36.164,
-        "timestamp": "2026-02-19T13:25:09.165Z",
-        "source": "session-skip"
-      },
-      {
-        "price": 36.19,
-        "timestamp": "2026-02-19T13:27:09.119Z",
-        "source": "session-skip"
-      },
-      {
-        "price": 36.185,
-        "timestamp": "2026-02-19T13:29:09.451Z",
-        "source": "session-skip"
-      },
-      {
-        "price": 36.164,
-        "timestamp": "2026-02-19T13:31:09.584Z",
-        "source": "session-skip"
-      },
-      {
-        "price": 37.487,
-        "timestamp": "2026-02-19T13:33:09.478Z",
-        "source": "session-skip"
-      },
-      {
-        "price": 37.011,
-        "timestamp": "2026-02-19T13:35:09.740Z",
-        "source": "session-skip"
-      },
       {
         "price": 38.287,
         "timestamp": "2026-02-19T13:37:09.196Z",
@@ -509,39 +479,39 @@
         "price": 36.164,
         "timestamp": "2026-03-20T03:00:00.000Z",
         "source": "session-skip"
+      },
+      {
+        "price": 36.164,
+        "timestamp": "2026-03-20T06:30:00.000Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 36.856,
+        "timestamp": "2026-03-20T10:00:00.000Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 36.164,
+        "timestamp": "2026-03-21T03:00:00.000Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 36.164,
+        "timestamp": "2026-03-21T06:30:00.000Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 36.164,
+        "timestamp": "2026-03-21T10:00:00.000Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 36.758,
+        "timestamp": "2026-03-22T03:00:00.000Z",
+        "source": "session-skip"
       }
     ],
     "DDR4": [
-      {
-        "price": 75.373,
-        "timestamp": "2026-02-19T13:25:09.173Z",
-        "source": "session-skip"
-      },
-      {
-        "price": 75.585,
-        "timestamp": "2026-02-19T13:27:09.123Z",
-        "source": "session-skip"
-      },
-      {
-        "price": 75.562,
-        "timestamp": "2026-02-19T13:29:09.455Z",
-        "source": "session-skip"
-      },
-      {
-        "price": 74.489,
-        "timestamp": "2026-02-19T13:31:09.587Z",
-        "source": "session-skip"
-      },
-      {
-        "price": 78.213,
-        "timestamp": "2026-02-19T13:33:09.493Z",
-        "source": "session-skip"
-      },
-      {
-        "price": 79.473,
-        "timestamp": "2026-02-19T13:35:09.742Z",
-        "source": "session-skip"
-      },
       {
         "price": 76.653,
         "timestamp": "2026-02-19T13:37:09.200Z",
@@ -1011,6 +981,36 @@
         "price": 81.818,
         "timestamp": "2026-03-20T03:00:00.000Z",
         "source": "session-skip"
+      },
+      {
+        "price": 77.727,
+        "timestamp": "2026-03-20T06:30:00.000Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 79.29,
+        "timestamp": "2026-03-20T10:00:00.000Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 77.722,
+        "timestamp": "2026-03-21T03:00:00.000Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 77.618,
+        "timestamp": "2026-03-21T06:30:00.000Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 74.816,
+        "timestamp": "2026-03-21T10:00:00.000Z",
+        "source": "session-skip"
+      },
+      {
+        "price": 78.174,
+        "timestamp": "2026-03-22T03:00:00.000Z",
+        "source": "session-skip"
       }
     ]
   },
@@ -1018,16 +1018,16 @@
     "DDR5": {
       "highest": 39.97,
       "lowest": 36.164,
-      "average": 37.89455000000001,
+      "average": 37.88524000000001,
       "totalUpdates": 100,
-      "lastUpdate": "2026-03-20T03:00:00.000Z"
+      "lastUpdate": "2026-03-22T03:00:00.000Z"
     },
     "DDR4": {
       "highest": 82.329,
       "lowest": 74.489,
-      "average": 78.65145999999996,
+      "average": 78.71797999999998,
       "totalUpdates": 100,
-      "lastUpdate": "2026-03-20T03:00:00.000Z"
+      "lastUpdate": "2026-03-22T03:00:00.000Z"
     }
   }
 }

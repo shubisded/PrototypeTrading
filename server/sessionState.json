@@ -3,11 +3,11 @@
     "createdAt": "2026-02-13T00:00:00.000Z",
     "version": "1.0"
   },
-  "skipSessionCount": 85,
+  "skipSessionCount": 91,
   "priceToBeat": {
-    "DDR5": 36.164,
-    "DDR4": 81.818
+    "DDR5": 36.758,
+    "DDR4": 78.174
   },
-  "lastSessionAt": "2026-03-20T03:00:00.000Z",
+  "lastSessionAt": "2026-03-22T08:30:00.000Z",
   "lastSessionSlotIndex": 0
 }
