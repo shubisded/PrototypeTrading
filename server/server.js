@@ -355,15 +355,56 @@ const reconcileSessionSlotIndexFromTimestamp = () => {
   sessionState.lastSessionSlotIndex = bestIndex;
 };
 
-const getLatestHistoryTimestamp = () => {
-  const firstTicker = Object.keys(pricesData.priceHistory)[0];
-  const entries = firstTicker ? pricesData.priceHistory[firstTicker] : [];
-  const lastIso = entries?.[entries.length - 1]?.timestamp;
-  const parsed = lastIso ? new Date(lastIso) : null;
-  if (parsed && !Number.isNaN(parsed.getTime())) return parsed;
-  return getPrevOrCurrentSessionSlot(new Date());
+const buildStrictSessionTimeline = (count, endDate, endSlotIndex) => {
+  const total = Math.max(0, Number(count) || 0);
+  if (!total) return [];
+
+  const timeline = new Array(total);
+  let cursor = alignTimestampToSlotIndex(endDate, endSlotIndex);
+  let slotIdx = Math.max(0, Math.min(SESSION_SLOTS_MINUTES.length - 1, Number(endSlotIndex) || 0));
+
+  timeline[total - 1] = new Date(cursor);
+
+  for (let i = total - 2; i >= 0; i--) {
+    slotIdx -= 1;
+    if (slotIdx < 0) {
+      slotIdx = SESSION_SLOTS_MINUTES.length - 1;
+      cursor = new Date(cursor);
+      cursor.setUTCDate(cursor.getUTCDate() - 1);
+    }
+    const slotMinutes = SESSION_SLOTS_MINUTES[slotIdx];
+    const point = new Date(cursor);
+    point.setUTCHours(Math.floor(slotMinutes / 60), slotMinutes % 60, 0, 0);
+    timeline[i] = point;
+  }
+
+  return timeline;
 };
 
+const normalizePriceHistoryTimeline = () => {
+  const alignedEnd = alignTimestampToSlotIndex(
+    new Date(sessionState.lastSessionAt || getLatestHistoryTimestamp().toISOString()),
+    sessionState.lastSessionSlotIndex,
+  );
+
+  Object.keys(pricesData.priceHistory).forEach((ticker) => {
+    const series = Array.isArray(pricesData.priceHistory[ticker])
+      ? pricesData.priceHistory[ticker]
+      : [];
+    const timeline = buildStrictSessionTimeline(
+      series.length,
+      alignedEnd,
+      sessionState.lastSessionSlotIndex,
+    );
+
+    series.forEach((entry, idx) => {
+      if (!timeline[idx]) return;
+      entry.timestamp = timeline[idx].toISOString();
+    });
+  });
+
+  saveJsonFile(PRICES_FILE, pricesData);
+};
 const buildDefaultSessionState = () => ({
   metadata: {
     createdAt: new Date().toISOString(),
@@ -1491,10 +1532,12 @@ app.post("/api/sessions/reconcile", (req, res) => {
     parsed,
     sessionState.lastSessionSlotIndex,
   ).toISOString();
+  normalizePriceHistoryTimeline();
   saveJsonFile(SESSION_STATE_FILE, sessionState);
 
   res.json({
     ok: true,
+    repaired: true,
     lastSessionAt: sessionState.lastSessionAt,
     lastSessionSlotIndex: sessionState.lastSessionSlotIndex,
   });
@@ -1724,6 +1767,7 @@ httpServer.listen(PORT, () => {
   console.log(`Prices file: ${PRICES_FILE}`);
   console.log(`Account file: ${ACCOUNT_FILE}`);
 });
+
 
 
 
