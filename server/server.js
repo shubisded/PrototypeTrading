@@ -275,7 +275,7 @@ const appendActivity = (text) => {
 
 const getPrevOrCurrentSessionSlot = (baseDate = new Date()) => {
   const date = new Date(baseDate);
-  const nowMinutes = date.getHours() * 60 + date.getMinutes();
+  const nowMinutes = date.getUTCHours() * 60 + date.getUTCMinutes();
   let slot = SESSION_SLOTS_MINUTES[0];
 
   for (const candidate of SESSION_SLOTS_MINUTES) {
@@ -288,11 +288,11 @@ const getPrevOrCurrentSessionSlot = (baseDate = new Date()) => {
 
   // If we are before the first slot, use previous day's last slot.
   if (nowMinutes < SESSION_SLOTS_MINUTES[0]) {
-    date.setDate(date.getDate() - 1);
+    date.setUTCDate(date.getUTCDate() - 1);
     slot = SESSION_SLOTS_MINUTES[SESSION_SLOTS_MINUTES.length - 1];
   }
 
-  date.setHours(Math.floor(slot / 60), slot % 60, 0, 0);
+  date.setUTCHours(Math.floor(slot / 60), slot % 60, 0, 0);
   return date;
 };
 
@@ -305,18 +305,18 @@ const getNextSessionSlotFromIndex = (fromDate, slotIndex) => {
   // Move by session sequence, independent from server timezone normalization.
   if (normalizedIndex < SESSION_SLOTS_MINUTES.length - 1) {
     const nextSlot = SESSION_SLOTS_MINUTES[normalizedIndex + 1];
-    date.setHours(Math.floor(nextSlot / 60), nextSlot % 60, 0, 0);
+    date.setUTCHours(Math.floor(nextSlot / 60), nextSlot % 60, 0, 0);
     return date;
   }
 
-  date.setDate(date.getDate() + 1);
+  date.setUTCDate(date.getUTCDate() + 1);
   const firstSlot = SESSION_SLOTS_MINUTES[0];
-  date.setHours(Math.floor(firstSlot / 60), firstSlot % 60, 0, 0);
+  date.setUTCHours(Math.floor(firstSlot / 60), firstSlot % 60, 0, 0);
   return date;
 };
 
 const getSessionSlotIndex = (date) => {
-  const minutes = date.getHours() * 60 + date.getMinutes();
+  const minutes = date.getUTCHours() * 60 + date.getUTCMinutes();
   return SESSION_SLOTS_MINUTES.findIndex((slot) => slot === minutes);
 };
 
@@ -331,7 +331,7 @@ const reconcileSessionSlotIndexFromTimestamp = () => {
   }
 
   // Legacy/offset safety: choose the nearest of 8:30, 12:00, 3:30.
-  const minutes = parsed.getHours() * 60 + parsed.getMinutes();
+  const minutes = parsed.getUTCHours() * 60 + parsed.getUTCMinutes();
   let bestIndex = 0;
   let bestDistance = Number.POSITIVE_INFINITY;
   SESSION_SLOTS_MINUTES.forEach((slot, idx) => {
@@ -1694,6 +1694,7 @@ httpServer.listen(PORT, () => {
   console.log(`Prices file: ${PRICES_FILE}`);
   console.log(`Account file: ${ACCOUNT_FILE}`);
 });
+
 
 
 
