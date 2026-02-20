@@ -27,6 +27,7 @@ const TradeCard: React.FC<Props> = ({
   const [tradeToast, setTradeToast] = useState<string>("");
   const [showTradeConfirm, setShowTradeConfirm] = useState(false);
   const [sellPercent, setSellPercent] = useState(0);
+  const [buyPercent, setBuyPercent] = useState(0);
   const guestId = getOrCreateGuestId();
 
   useEffect(() => {
@@ -115,8 +116,10 @@ const TradeCard: React.FC<Props> = ({
     setTradeError("");
     if (tradeType === "BUY") {
       setSellPercent(0);
+      setBuyPercent(0);
       return;
     }
+    setBuyPercent(0);
     setAmount("0");
   }, [tradeType, market.id, outcome]);
 
@@ -139,6 +142,7 @@ const TradeCard: React.FC<Props> = ({
     outcome === "YES"
       ? market.probability / 100
       : (100 - market.probability) / 100;
+  const outcomeLabel = outcome === "YES" ? "UP" : "DOWN";
   const numericAmount = parseFloat(amount) || 0;
   const profitMultiplier = sharePrice > 0 ? 1 / sharePrice : 0;
   const buyPayout = numericAmount * profitMultiplier;
@@ -171,6 +175,53 @@ const TradeCard: React.FC<Props> = ({
     const rawContracts = (availableContracts * safePercent) / 100;
     const roundedContracts = Math.floor(rawContracts);
     setAmount(String(Math.max(0, roundedContracts)));
+  };
+
+  const applyBuyPercent = (percent: number) => {
+    const safePercent = Math.max(0, Math.min(100, Math.round(percent)));
+    setBuyPercent(safePercent);
+    if (safePercent === 100) {
+      setAmount(availableBalance.toFixed(2));
+      return;
+    }
+    const usdAmount = (availableBalance * safePercent) / 100;
+    setAmount(usdAmount.toFixed(2));
+  };
+
+  const syncSellPercentFromAmount = (nextAmount: number) => {
+    if (!Number.isFinite(nextAmount) || availableContracts <= 0) {
+      setSellPercent(0);
+      return;
+    }
+    const pct = Math.max(
+      0,
+      Math.min(100, Math.round((nextAmount / availableContracts) * 100)),
+    );
+    setSellPercent(pct);
+  };
+
+  const syncBuyPercentFromAmount = (nextAmount: number) => {
+    if (!Number.isFinite(nextAmount) || availableBalance <= 0) {
+      setBuyPercent(0);
+      return;
+    }
+    const pct = Math.max(
+      0,
+      Math.min(100, Math.round((nextAmount / availableBalance) * 100)),
+    );
+    setBuyPercent(pct);
+  };
+
+  const normalizeAmountInput = (raw: string) => {
+    if (raw === "") return raw;
+    if (!raw.includes(".")) {
+      const collapsed = raw.replace(/^0+(?=\d)/, "");
+      return collapsed === "" ? "0" : collapsed;
+    }
+    const [intPart, fracPart = ""] = raw.split(".");
+    const normalizedInt =
+      intPart === "" ? "0" : intPart.replace(/^0+(?=\d)/, "") || "0";
+    return `${normalizedInt}.${fracPart}`;
   };
 
   const executeTrade = async () => {
@@ -224,13 +275,13 @@ const TradeCard: React.FC<Props> = ({
           },
         }),
       );
-      if (tradeType === "BUY") {
-        setTradeToast(
-          `${outcome} position opened: ${estimatedShares.toFixed(2)} contracts`,
+        if (tradeType === "BUY") {
+          setTradeToast(
+          `${outcomeLabel} position opened: ${estimatedShares.toFixed(2)} contracts`,
         );
       } else {
         setTradeToast(
-          `${outcome} contracts sold: ${contractsToSell.toFixed(2)} contracts`,
+          `${outcomeLabel} contracts sold: ${contractsToSell.toFixed(2)} contracts`,
         );
         setSellPercent(0);
         setAmount("0");
@@ -262,12 +313,12 @@ const TradeCard: React.FC<Props> = ({
   }, [tradeToast]);
 
   return (
-    <div className="w-full bg-[#0c1515] border border-[#1a2e2e] rounded-2xl overflow-hidden shadow-2xl flex flex-col min-h-[480px]">
+    <div className="w-full bg-[#0c1515] border border-[#1a2e2e] rounded-2xl overflow-hidden shadow-2xl flex flex-col">
       {/* Header Tabs */}
       <div className="flex bg-[#040b0b] border-b border-[#1a2e2e] shrink-0">
         <button
           onClick={() => setTradeType("BUY")}
-          className={`flex-1 py-4 text-[11px] font-bold uppercase tracking-[0.3em] transition-all relative ${
+          className={`flex-1 py-4 text-[14px] font-extrabold uppercase tracking-[0.18em] transition-all relative ${
             tradeType === "BUY"
               ? "text-[#2ed3b7] bg-[#0d1c1c]"
               : "text-[#7f8c8d] hover:text-[#2ed3b7] hover:bg-[#0d1c1c]/30"
@@ -280,7 +331,7 @@ const TradeCard: React.FC<Props> = ({
         </button>
         <button
           onClick={() => setTradeType("SELL")}
-          className={`flex-1 py-4 text-[11px] font-bold uppercase tracking-[0.3em] transition-all relative ${
+          className={`flex-1 py-4 text-[14px] font-extrabold uppercase tracking-[0.18em] transition-all relative ${
             tradeType === "SELL"
               ? "text-rose-500 bg-[#1c0d0d]/30"
               : "text-[#7f8c8d] hover:text-rose-400 hover:bg-[#1c0d0d]/10"
@@ -294,58 +345,58 @@ const TradeCard: React.FC<Props> = ({
       </div>
 
       {/* Selected Poll Context */}
-      <div className="shrink-0 px-6 pt-5 pb-3 border-b border-[#1a2e2e]/60 bg-[#0a1414]">
+      <div className="shrink-0 px-6 pt-4 pb-3 border-b border-[#1a2e2e]/60 bg-[#0a1414]">
         <div className="flex items-center gap-2 mb-2">
-          <span className="px-2 py-0.5 bg-[#1a2e2e] text-[#2ed3b7] text-[8px] font-bold rounded uppercase tracking-[0.16em]">
+          <span className="px-2 py-0.5 bg-[#1a2e2e] text-[#2ed3b7] text-[9px] font-bold rounded uppercase tracking-[0.12em]">
             {market.ticker}
           </span>
-          <span className="text-[8px] font-bold text-[#7f8c8d] uppercase tracking-[0.16em]">
+          <span className="text-[9px] font-bold text-[#7f8c8d] uppercase tracking-[0.12em]">
             Selected Poll
           </span>
         </div>
-        <p className="text-[10px] leading-relaxed text-white/90 font-semibold uppercase tracking-[0.04em] line-clamp-3">
+        <p className="text-[11px] leading-relaxed text-white/90 font-semibold tracking-[0.01em] line-clamp-3">
           {market.question}
         </p>
       </div>
 
       {/* Scrollable Content Area */}
-      <div className="flex-grow overflow-y-auto custom-scrollbar p-6 space-y-6">
+      <div className="p-4 space-y-3">
         {/* Outcome Toggle */}
-        <div className="flex gap-3 p-2 bg-[#040b0b] rounded-2xl border border-[#1a2e2e]">
+        <div className="flex gap-2 p-2 bg-[#040b0b] rounded-2xl border border-[#1a2e2e]">
           <button
             onClick={() => setOutcome("YES")}
-            className={`flex-1 py-4 text-[13px] font-bold uppercase tracking-[0.18em] rounded-xl transition-all ${
+            className={`flex-1 py-3 text-[12px] font-bold uppercase tracking-[0.12em] rounded-xl transition-all ${
               outcome === "YES"
                 ? tradeType === "BUY"
-                  ? "bg-[#2ed3b7] text-[#040b0b] shadow-lg"
+                  ? "bg-[#2ed3b7] text-white shadow-lg"
                   : "bg-rose-600 text-white shadow-lg"
                 : "text-[#7f8c8d] hover:text-[#7f8c8d]"
             }`}
           >
-            {tradeType === "BUY" ? "Buy Yes" : "Sell Yes"}
+            UP {Math.round(market.probability)}%
           </button>
           <button
             onClick={() => setOutcome("NO")}
-            className={`flex-1 py-4 text-[13px] font-bold uppercase tracking-[0.18em] rounded-xl transition-all ${
+            className={`flex-1 py-3 text-[12px] font-bold uppercase tracking-[0.12em] rounded-xl transition-all ${
               outcome === "NO"
                 ? tradeType === "BUY"
-                  ? "bg-white text-[#040b0b] shadow-lg"
+                  ? "bg-[#2ed3b7] text-white shadow-lg"
                   : "bg-rose-600 text-white shadow-lg"
                 : "text-[#7f8c8d] hover:text-[#7f8c8d]"
             }`}
           >
-            {tradeType === "BUY" ? "Buy No" : "Sell No"}
+            DOWN {Math.max(0, Math.round(100 - market.probability))}%
           </button>
         </div>
 
         {/* Amount Input */}
-        <div className="space-y-3">
+        <div className="space-y-2">
           <div className="flex justify-between items-center px-1">
-            <label className="text-[9px] font-bold uppercase tracking-[0.2em] text-[#7f8c8d]">
+            <label className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#7f8c8d]">
               {tradeType === "BUY" ? "Trade Amount" : "Contracts"}
             </label>
             <span
-              className={`text-[9px] font-bold uppercase tracking-widest ${
+              className={`text-[10px] font-bold uppercase tracking-[0.1em] ${
                 tradeType === "BUY" ? "text-[#2ed3b7]" : "text-rose-500"
               }`}
             >
@@ -362,9 +413,10 @@ const TradeCard: React.FC<Props> = ({
               type="number"
               value={amount}
               onChange={(e) => {
-                const nextRaw = e.target.value;
+                const nextRaw = normalizeAmountInput(e.target.value);
                 if (tradeType === "BUY") {
                   setSellPercent(0);
+                  syncBuyPercentFromAmount(Number(nextRaw));
                   setAmount(nextRaw);
                   return;
                 }
@@ -382,11 +434,12 @@ const TradeCard: React.FC<Props> = ({
                 } else if (tradeError === "Cannot sell more than owned contracts") {
                   setTradeError("");
                 }
-                setSellPercent(0);
+                syncSellPercentFromAmount(nextNumeric);
+                setBuyPercent(0);
                 setAmount(nextRaw);
               }}
               onWheel={(e) => (e.target as HTMLInputElement).blur()}
-              className={`w-full bg-[#040b0b] border border-[#1a2e2e] p-4 text-4xl font-bold text-white focus:outline-none transition-all rounded-xl pr-12 ${
+              className={`w-full bg-[#040b0b] border border-[#1a2e2e] p-3 text-4xl font-bold text-white focus:outline-none transition-all rounded-xl pr-12 ${
                 tradeType === "BUY"
                   ? "focus:border-[#2ed3b7]"
                   : "focus:border-rose-600"
@@ -415,79 +468,51 @@ const TradeCard: React.FC<Props> = ({
                 onChange={(e) => applySellPercent(Number(e.target.value))}
                 className="w-full accent-rose-500"
               />
-              <div className="grid grid-cols-4 gap-2">
-                {[25, 50, 75, 100].map((pct) => (
-                  <button
-                    key={pct}
-                    type="button"
-                    onClick={() => applySellPercent(pct)}
-                    className="h-8 rounded-md border border-[#2e1a1a] text-[10px] font-bold uppercase tracking-[0.12em] text-rose-300 hover:bg-[#1f1313]"
-                  >
-                    {pct}%
-                  </button>
-                ))}
-              </div>
-              <button
-                type="button"
-                onClick={() => setAmount(availableContracts.toFixed(4))}
-                className="w-full h-8 rounded-md border border-[#2e1a1a] text-[10px] font-bold uppercase tracking-[0.12em] text-rose-300 hover:bg-[#1f1313]"
-              >
-                MAX
-              </button>
             </div>
-          ) : null}
+          ) : (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-[9px] font-bold uppercase tracking-[0.14em] text-[#7f8c8d]">
+                  Buy %
+                </span>
+                <span className="text-[9px] font-bold uppercase tracking-[0.14em] text-[#2ed3b7]">
+                  {buyPercent}%
+                </span>
+              </div>
+              <input
+                type="range"
+                min={0}
+                max={100}
+                step={1}
+                value={buyPercent}
+                onChange={(e) => applyBuyPercent(Number(e.target.value))}
+                className="w-full accent-[#2ed3b7]"
+              />
+            </div>
+          )}
         </div>
 
         {/* Summary Details */}
         <div
-          className={`space-y-4 p-6 rounded-2xl border transition-all ${
+          className={`space-y-3 p-4 rounded-2xl border transition-all ${
             tradeType === "BUY"
               ? outcome === "YES"
                 ? "bg-[#0d1c1c]/30 border-[#1a2e2e]"
-                : "bg-[#ffffff]/5 border-[#333]"
+                : "bg-[#0d1c1c]/30 border-[#1a2e2e]"
               : "bg-[#1c0d0d]/20 border-[#2e1a1a]"
           }`}
         >
-          <div className="flex justify-between items-center text-[11px] font-bold uppercase tracking-tight">
-            <span className="text-[#7f8c8d]">
-              {tradeType === "BUY" ? "Avg Price" : "Avg Sell Price"}
-            </span>
-            <span
-              className={tradeType === "BUY" ? "text-white" : "text-rose-400"}
-            >
-              ${sharePrice.toFixed(2)}
-            </span>
-          </div>
-          <div className="flex justify-between items-center text-[11px] font-bold uppercase tracking-tight">
-            <span className="text-[#7f8c8d]">
-              {tradeType === "BUY" ? "Est. Shares" : "Contracts"}
-            </span>
-            <span
-              className={
-                tradeType === "BUY"
-                  ? outcome === "YES"
-                    ? "text-[#2ed3b7]"
-                    : "text-white"
-                  : "text-rose-400"
-              }
-            >
-              {tradeType === "BUY"
-                ? estimatedShares.toFixed(2)
-                : contractsToSell.toFixed(2)}
-            </span>
-          </div>
           {tradeType === "BUY" ? (
-            <div className="pt-4 border-t border-[#1a2e2e]/50 flex justify-between items-center text-[11px] font-bold uppercase tracking-widest">
-              <span className="text-[#7f8c8d]">Payout</span>
-              <span className="text-white">
-                ${buyPayout.toFixed(2)}{" "}
-                <span className="ml-2 text-[#2ed3b7]">
-                  ({profitMultiplier.toFixed(2)}x)
-                </span>
+            <div className="flex justify-between items-center">
+              <span className="text-[12px] font-black uppercase tracking-[0.16em] text-[#9ab9b9]">
+                You Win
+              </span>
+              <span className="text-[22px] leading-none font-black text-[#2ed3b7] drop-shadow-[0_0_10px_rgba(46,211,183,0.45)]">
+                ${buyPayout.toFixed(2)}
               </span>
             </div>
           ) : (
-            <div className="pt-4 border-t border-[#1a2e2e]/50 flex justify-between items-center text-[11px] font-bold uppercase tracking-widest">
+            <div className="flex justify-between items-center text-[11px] font-bold uppercase tracking-[0.08em]">
               <span className="text-[#7f8c8d]">You'll Receive</span>
               <span className="text-rose-400">
                 ${estimatedProceeds.toFixed(2)}
@@ -497,17 +522,17 @@ const TradeCard: React.FC<Props> = ({
         </div>
 
         {tradeError ? (
-          <div className="text-[10px] font-bold uppercase tracking-[0.12em] text-rose-400 text-center">
+          <div className="text-[11px] font-bold uppercase tracking-[0.08em] text-rose-400 text-center">
             {tradeError}
           </div>
         ) : null}
         {tradeType === "SELL" ? (
-          <div className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#7f8c8d] text-center">
+          <div className="text-[10px] font-bold uppercase tracking-[0.08em] text-[#7f8c8d] text-center">
             Available To Sell: {availableContracts.toFixed(2)} Contracts
           </div>
         ) : null}
         {tradeToast ? (
-          <div className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#2ed3b7] text-center">
+          <div className="text-[11px] font-bold uppercase tracking-[0.08em] text-[#2ed3b7] text-center">
             {tradeToast}
           </div>
         ) : null}
@@ -523,17 +548,13 @@ const TradeCard: React.FC<Props> = ({
         <button
           onClick={handleConfirmTrade}
           disabled={!canSubmit}
-          className={`w-full py-5 font-bold text-[13px] uppercase tracking-[0.25em] transition-all rounded-xl shadow-xl active:scale-[0.98] ${
+          className={`w-full py-5 font-bold text-[13px] uppercase tracking-[0.14em] transition-all rounded-xl shadow-xl active:scale-[0.98] ${
             tradeType === "BUY"
-              ? outcome === "YES"
-                ? "bg-[#2ed3b7] text-[#040b0b] shadow-[#2ed3b7]/10 hover:bg-[#2ed3b7]/90"
-                : "bg-white text-[#040b0b] shadow-white/10 hover:bg-[#f0f0f0]"
+              ? "bg-[#2ed3b7] text-[#040b0b] shadow-[#2ed3b7]/10 hover:bg-[#2ed3b7]/90"
               : "bg-rose-600 text-white shadow-rose-600/10 hover:bg-rose-500"
           } ${!canSubmit ? "opacity-50 cursor-not-allowed hover:bg-inherit" : ""}`}
         >
-          {submitting
-            ? "Processing..."
-            : `Confirm ${tradeType === "BUY" ? "Buy" : "Sell"} ${outcome} Order`}
+          {submitting ? "Processing..." : "Trade"}
         </button>
       </div>
 
@@ -545,8 +566,8 @@ const TradeCard: React.FC<Props> = ({
             </h3>
             <p className="text-[12px] font-semibold uppercase tracking-[0.08em] text-white leading-relaxed">
               {tradeType === "BUY"
-                ? `Open ${outcome} position on ${market.ticker} for $${numericAmount.toFixed(2)}?`
-                : `Sell ${contractsToSell.toFixed(2)} ${outcome} contracts on ${market.ticker}?`}
+                ? `Open ${outcomeLabel} position on ${market.ticker} for $${numericAmount.toFixed(2)}?`
+                : `Sell ${contractsToSell.toFixed(2)} ${outcomeLabel} contracts on ${market.ticker}?`}
             </p>
             <div className="grid grid-cols-2 gap-2">
               <button

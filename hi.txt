@@ -1,10 +1,5 @@
 Current Errors
-1 Dont Refill Money Whenever it goes to 0 also cash can never be negative
-2 over history synthetic positions and prediction positions add header for specific things theres no way for a person to know about it
-3 wheenever i scroll up or down amount should not increase also 
-4 WHy does buy show Cannot sell more than owned contracts
-6 Add a slider to select how much to sell % like 100% or 50% select like that it cant be in decimals it should not be decimals
-7 If the person sold  100% of contracts it should close the position 
-8 add a tick for minimum balance so if there are leftover contracts like 0.01 hide ir or keep it if tick is yes then hide it if not ticked show it 
-9 AUdit Decimal Calculation For selling contracts are they correct or not? like because if i sell 1780.31 it says ot enough contract to sell though we are using slider for it but still audit it
-10 when i sold my contract i see cash $1365.15 which is wrong calculations actuatially it should be 1490 theres some logic error there audit that also
+1) current fauls
+- CHoose your table empty
+- wrong logic 
+2) remove confirm buy yes order as well as no order to just trade

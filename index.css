@@ -1,0 +1,173 @@
+:root {
+  --casino-bg: #0f1720;
+  --casino-bg-2: #141e29;
+  --casino-panel: #1a2430;
+  --casino-panel-2: #161f2b;
+  --casino-border: #2a394a;
+  --casino-text: #f4f8ff;
+  --casino-muted: #9fb1c5;
+  --casino-cyan: #63f3d0;
+  --casino-green: #00e701;
+  --casino-red: #ff5c7c;
+  --casino-yellow: #ffc449;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: "Roboto", sans-serif !important;
+  color: var(--casino-text);
+  background:
+    radial-gradient(circle at 12% -8%, rgba(99, 243, 208, 0.12), transparent 45%),
+    radial-gradient(circle at 90% -12%, rgba(0, 231, 1, 0.11), transparent 40%),
+    linear-gradient(180deg, var(--casino-bg-2) 0%, var(--casino-bg) 100%);
+}
+
+.casino-ui {
+  position: relative;
+}
+
+.casino-ui::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 120;
+  background:
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.02), transparent 24%),
+    radial-gradient(circle at center, transparent 40%, rgba(0, 0, 0, 0.34) 100%);
+}
+
+.casino-ui * {
+  font-family: inherit;
+}
+
+.casino-ui h1,
+.casino-ui h2,
+.casino-ui h3,
+.casino-ui .tracking-\[0\.3em\],
+.casino-ui .tracking-\[0\.25em\],
+.casino-ui .tracking-\[0\.2em\] {
+  font-family: "Rajdhani", "Roboto", sans-serif !important;
+  letter-spacing: 0.06em !important;
+}
+
+.casino-ui .bg-\[\#040b0b\],
+.casino-ui .bg-\[\#0c1515\],
+.casino-ui .bg-\[\#0b1818\],
+.casino-ui .bg-\[\#081111\],
+.casino-ui .bg-\[\#071010\] {
+  background: linear-gradient(180deg, #1a2532 0%, #161f2b 100%) !important;
+}
+
+.casino-ui .border-\[\#1a2e2e\],
+.casino-ui .border-\[\#253d3d\],
+.casino-ui .border-\[\#2a3a3a\],
+.casino-ui .border-\[\#2e1a1a\],
+.casino-ui .border-\[\#2f4f66\] {
+  border-color: var(--casino-border) !important;
+}
+
+.casino-ui .text-\[\#2ed3b7\],
+.casino-ui .text-\[\#9be7db\] {
+  color: #63f3d0 !important;
+}
+
+.casino-ui .text-\[\#7f8c8d\] {
+  color: var(--casino-muted) !important;
+}
+
+.casino-ui .text-rose-500,
+.casino-ui .text-rose-400 {
+  color: var(--casino-red) !important;
+}
+
+.casino-ui nav {
+  background: rgba(18, 26, 35, 0.92) !important;
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--casino-border) !important;
+}
+
+.casino-ui button {
+  border-radius: 12px;
+  transition: all 0.18s ease;
+}
+
+.casino-ui button:hover {
+  filter: brightness(1.08);
+}
+
+.casino-ui .bg-\[\#2ed3b7\] {
+  background: linear-gradient(180deg, #2cff6c 0%, #00d83a 100%) !important;
+  color: #0b1b10 !important;
+}
+
+.casino-ui .bg-rose-600,
+.casino-ui .bg-rose-500 {
+  background: linear-gradient(180deg, #ff7390 0%, #ef476f 100%) !important;
+}
+
+.casino-ui .bg-\[\#1d4ed8\],
+.casino-ui .bg-\[\#1e40af\] {
+  background: linear-gradient(180deg, #4f6f95 0%, #354c67 100%) !important;
+}
+
+.casino-ui input,
+.casino-ui select,
+.casino-ui textarea {
+  border-radius: 10px !important;
+  background: #121b27 !important;
+  border-color: #33485e !important;
+  color: var(--casino-text) !important;
+}
+
+.casino-ui .rounded-lg,
+.casino-ui .rounded-xl,
+.casino-ui .rounded-2xl,
+.casino-ui .rounded-3xl,
+.casino-ui .rounded-md {
+  border-radius: 10px !important;
+}
+
+.casino-ui .rounded-full {
+  border-radius: 9999px !important;
+}
+
+.casino-ui .shadow-xl,
+.casino-ui .shadow-2xl,
+.casino-ui [class*="shadow-"] {
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.04),
+    0 8px 20px rgba(2, 9, 20, 0.42) !important;
+}
+
+.casino-ui canvas {
+  filter: saturate(1.15);
+}
+
+.casino-ui .custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.casino-ui .custom-scrollbar::-webkit-scrollbar-track {
+  background: #0f182a;
+}
+
+.casino-ui .custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #2b4569;
+  border-radius: 8px;
+}
+
+.casino-ui .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #3d5f90;
+}

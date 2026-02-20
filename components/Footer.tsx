@@ -2,13 +2,13 @@ import React from "react";
 
 const Footer: React.FC = () => {
   return (
-    <footer className="relative z-30 w-full max-w-[1600px] flex items-center justify-between px-8 py-6 mt-2">
+    <footer className="relative z-30 w-full max-w-[1700px] flex items-center justify-between px-6 md:px-8 py-5 mt-1">
       {/* Left side: Network Info */}
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2 bg-[#0c1515] border border-[#1a2e2e] rounded-full px-4 py-2 shadow-lg">
           <span className="w-2 h-2 rounded-full bg-[#2ed3b7] shadow-[0_0_8px_#2ed3b7]"></span>
-          <span className="text-[10px] font-bold text-[#2ed3b7] uppercase tracking-[0.2em]">
-            Network: Mainnet
+          <span className="text-[11px] font-bold text-[#2ed3b7] uppercase tracking-[0.14em]">
+            Floor: Mainnet
           </span>
         </div>
         <div className="hidden lg:flex items-center gap-6 ml-6">
@@ -16,7 +16,7 @@ const Footer: React.FC = () => {
             <a
               key={item}
               href="#"
-              className="text-[10px] font-bold text-[#7f8c8d] hover:text-[#2ed3b7] transition-colors uppercase tracking-widest"
+              className="text-[11px] font-bold text-[#7f8c8d] hover:text-[#2ed3b7] transition-colors uppercase tracking-[0.12em]"
             >
               {item}
             </a>
@@ -26,7 +26,7 @@ const Footer: React.FC = () => {
 
       {/* Floating Action (Mock Chat Button) */}
       <div className="relative">
-        <button className="w-14 h-14 bg-[#2ed3b7] rounded-full flex items-center justify-center shadow-2xl shadow-[#2ed3b7]/30 hover:scale-110 active:scale-95 transition-all">
+        <button className="w-12 h-12 bg-[#2ed3b7] rounded-full flex items-center justify-center shadow-2xl shadow-[#2ed3b7]/30 hover:scale-110 active:scale-95 transition-all">
           <svg
             width="24"
             height="24"

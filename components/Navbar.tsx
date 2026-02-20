@@ -131,34 +131,37 @@ const Navbar: React.FC<Props> = ({ onHome }) => {
   }, [showToast]);
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-[100] flex items-center justify-between px-6 h-16 bg-[#040b0b] border-b border-[#1a2e2e]">
-      <div className="flex items-center gap-10">
-        <div onClick={onHome} className="flex items-center gap-3 cursor-pointer group">
-          <div className="w-8 h-8 bg-[#2ed3b7] rounded flex items-center justify-center transform rotate-45 group-hover:rotate-0 transition-transform duration-300">
-            <span className="text-[#040b0b] font-bold text-lg transform -rotate-45 group-hover:rotate-0 transition-transform">
-              S
-            </span>
+    <nav className="fixed top-0 left-0 right-0 z-[100] flex items-center justify-between px-4 md:px-6 h-[70px] bg-[#040b0b] border-b border-[#1a2e2e]">
+      <div className="flex items-center gap-8">
+        <div onClick={onHome} className="flex items-center gap-4 cursor-pointer group">
+          <div className="w-11 h-11 overflow-hidden shrink-0">
+            <img
+              src="/site-logo.png"
+              alt="SiliconPredict logo"
+              className="w-full h-full object-contain"
+            />
           </div>
-          <span className="text-base font-bold tracking-tight text-white uppercase">
+          <span className="text-lg font-black tracking-[0.08em] text-white uppercase">
             SiliconPredict
           </span>
         </div>
 
-        <div className="hidden lg:flex items-center gap-8">
+        <div className="hidden lg:flex items-center gap-6">
           {["Markets", "Portfolio", "Leaderboard", "FAQ"].map((item) => (
             <button
               key={item}
-              className="text-[11px] font-bold uppercase tracking-[0.15em] text-[#7f8c8d] hover:text-[#2ed3b7] transition-colors"
+              className="text-[12px] font-bold uppercase tracking-[0.12em] text-[#7f8c8d] hover:text-[#2ed3b7] transition-colors"
             >
               {item}
             </button>
           ))}
         </div>
+
       </div>
 
-      <div className="relative flex items-center gap-2.5">
+      <div className="relative flex items-center gap-2">
         <div className="hidden md:flex items-center gap-2.5">
-          <div className="h-10 min-w-[102px] px-3 rounded-lg bg-[#0b1818] border border-[#1a2e2e] flex flex-col justify-center">
+          <div className="h-10 min-w-[108px] px-3 rounded-lg bg-[#0b1818] border border-[#1a2e2e] flex flex-col justify-center">
             <p className="text-[9px] text-[#7f8c8d] uppercase tracking-[0.12em] font-bold leading-none">
               Portfolio
             </p>
@@ -168,7 +171,7 @@ const Navbar: React.FC<Props> = ({ onHome }) => {
               ${portfolioPnL.toFixed(2)}
             </p>
           </div>
-          <div className="h-10 min-w-[102px] px-3 rounded-lg bg-[#0b1818] border border-[#1a2e2e] flex flex-col justify-center">
+          <div className="h-10 min-w-[108px] px-3 rounded-lg bg-[#0b1818] border border-[#1a2e2e] flex flex-col justify-center">
             <p className="text-[9px] text-[#7f8c8d] uppercase tracking-[0.12em] font-bold leading-none">
               Cash
             </p>
@@ -180,7 +183,7 @@ const Navbar: React.FC<Props> = ({ onHome }) => {
 
         <button
           onClick={handleDeposit}
-          className="px-4 h-10 bg-[#1d4ed8] hover:bg-[#1e40af] text-white text-[12px] font-bold tracking-tight transition-colors rounded-lg shadow-[0_4px_16px_rgba(29,78,216,0.35)]"
+          className="px-5 h-10 bg-[#1d4ed8] hover:bg-[#1e40af] text-white text-[13px] font-bold tracking-[0.06em] transition-colors rounded-lg shadow-[0_4px_16px_rgba(29,78,216,0.35)]"
         >
           Deposit
         </button>

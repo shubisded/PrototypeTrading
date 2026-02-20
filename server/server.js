@@ -11,15 +11,16 @@ const PRICES_FILE = path.join(__dirname, "prices.json");
 const ACCOUNT_FILE = path.join(__dirname, "demoAccount.json");
 const CHANCES_FILE = path.join(__dirname, "chances.json");
 const SESSION_STATE_FILE = path.join(__dirname, "sessionState.json");
+const ACTIVITY_FILE = path.join(__dirname, "activity.json");
 
 const BASE_TICKER_PRICES = {
   DDR5: 38.067,
-  DDR6: 9.654,
+  DDR4: 78.409,
 };
 
 const MARKET_IDS_BY_TICKER = {
   DDR5: ["1", "2"],
-  DDR6: ["3", "4"],
+  DDR4: ["3", "4"],
 };
 
 const DEFAULT_MARKET_CHANCES = {
@@ -32,9 +33,10 @@ const DEFAULT_MARKET_CHANCES = {
 const MARKET_DEFINITIONS = {
   "1": { category: "DDR5", ticker: "DDR5-AUG-F", period: "MONTHLY" },
   "2": { category: "DDR5", ticker: "DDR5-DAILY", period: "DAILY" },
-  "3": { category: "DDR6", ticker: "DDR6-AUG-F", period: "MONTHLY" },
-  "4": { category: "DDR6", ticker: "DDR6-DAILY", period: "DAILY" },
+  "3": { category: "DDR4", ticker: "DDR4-AUG-F", period: "MONTHLY" },
+  "4": { category: "DDR4", ticker: "DDR4-DAILY", period: "DAILY" },
 };
+const SESSION_SLOTS_MINUTES = [8 * 60 + 30, 12 * 60, 15 * 60 + 30];
 
 const isAllowedDevOrigin = (origin) => {
   if (!origin) return true;
@@ -91,6 +93,44 @@ const saveJsonFile = (filePath, data) => {
   } catch (error) {
     console.error(`Failed to write ${filePath}:`, error);
   }
+};
+
+const buildDefaultActivityData = () => ({
+  metadata: {
+    createdAt: new Date().toISOString(),
+    version: "1.0",
+  },
+  items: [],
+});
+
+const sanitizeActivityData = (raw) => {
+  const base = buildDefaultActivityData();
+  if (!raw || typeof raw !== "object") return base;
+  const items = Array.isArray(raw.items)
+    ? raw.items
+        .map((item) => ({
+          id: Number(item?.id) || Date.now(),
+          text: String(item?.text || "").trim(),
+          timestamp:
+            typeof item?.timestamp === "string" && item.timestamp
+              ? item.timestamp
+              : new Date().toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  second: "2-digit",
+                }),
+        }))
+        .filter((item) => item.text.length > 0)
+        .slice(0, 500)
+    : [];
+
+  return {
+    metadata: {
+      createdAt: raw.metadata?.createdAt || base.metadata.createdAt,
+      version: "1.0",
+    },
+    items,
+  };
 };
 
 const calculateStats = (priceEntries) => {
@@ -197,9 +237,83 @@ const sanitizePricesData = (raw) => {
 
 const pricesData = sanitizePricesData(loadJsonFile(PRICES_FILE));
 saveJsonFile(PRICES_FILE, pricesData);
+const activityData = sanitizeActivityData(loadJsonFile(ACTIVITY_FILE));
+saveJsonFile(ACTIVITY_FILE, activityData);
 
 const centralPrices = pricesData.currentPrices;
 console.log("Loaded prices:", centralPrices);
+
+const appendActivity = (text) => {
+  const trimmed = String(text || "").trim();
+  if (!trimmed) return;
+  const entry = {
+    id: Date.now() + Math.floor(Math.random() * 1000),
+    text: trimmed,
+    timestamp: new Date().toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    }),
+  };
+  activityData.items = [entry, ...activityData.items].slice(0, 500);
+  saveJsonFile(ACTIVITY_FILE, activityData);
+  io.emit("activityUpdated", { activityFeed: activityData.items });
+};
+
+const getPrevOrCurrentSessionSlot = (baseDate = new Date()) => {
+  const date = new Date(baseDate);
+  const nowMinutes = date.getHours() * 60 + date.getMinutes();
+  let slot = SESSION_SLOTS_MINUTES[0];
+
+  for (const candidate of SESSION_SLOTS_MINUTES) {
+    if (candidate <= nowMinutes) {
+      slot = candidate;
+    } else {
+      break;
+    }
+  }
+
+  // If we are before the first slot, use previous day's last slot.
+  if (nowMinutes < SESSION_SLOTS_MINUTES[0]) {
+    date.setDate(date.getDate() - 1);
+    slot = SESSION_SLOTS_MINUTES[SESSION_SLOTS_MINUTES.length - 1];
+  }
+
+  date.setHours(Math.floor(slot / 60), slot % 60, 0, 0);
+  return date;
+};
+
+const getNextSessionSlot = (fromDate) => {
+  const date = new Date(fromDate);
+  const minutes = date.getHours() * 60 + date.getMinutes();
+  const currentSlotIndex = SESSION_SLOTS_MINUTES.findIndex((slot) => slot === minutes);
+
+  if (currentSlotIndex >= 0 && currentSlotIndex < SESSION_SLOTS_MINUTES.length - 1) {
+    const nextSlot = SESSION_SLOTS_MINUTES[currentSlotIndex + 1];
+    date.setHours(Math.floor(nextSlot / 60), nextSlot % 60, 0, 0);
+    return date;
+  }
+
+  const nextDay = new Date(date);
+  nextDay.setDate(nextDay.getDate() + 1);
+  const firstSlot = SESSION_SLOTS_MINUTES[0];
+  nextDay.setHours(Math.floor(firstSlot / 60), firstSlot % 60, 0, 0);
+  return nextDay;
+};
+
+const getSessionSlotIndex = (date) => {
+  const minutes = date.getHours() * 60 + date.getMinutes();
+  return SESSION_SLOTS_MINUTES.findIndex((slot) => slot === minutes);
+};
+
+const getLatestHistoryTimestamp = () => {
+  const firstTicker = Object.keys(pricesData.priceHistory)[0];
+  const entries = firstTicker ? pricesData.priceHistory[firstTicker] : [];
+  const lastIso = entries?.[entries.length - 1]?.timestamp;
+  const parsed = lastIso ? new Date(lastIso) : null;
+  if (parsed && !Number.isNaN(parsed.getTime())) return parsed;
+  return getPrevOrCurrentSessionSlot(new Date());
+};
 
 const buildDefaultSessionState = () => ({
   metadata: {
@@ -208,6 +322,8 @@ const buildDefaultSessionState = () => ({
   },
   skipSessionCount: 0,
   priceToBeat: { ...centralPrices },
+  lastSessionAt: getLatestHistoryTimestamp().toISOString(),
+  lastSessionSlotIndex: getSessionSlotIndex(getPrevOrCurrentSessionSlot(getLatestHistoryTimestamp())),
 });
 
 const sanitizeSessionState = (raw) => {
@@ -221,6 +337,10 @@ const sanitizeSessionState = (raw) => {
     },
     skipSessionCount: Number(raw.skipSessionCount) || 0,
     priceToBeat: { ...base.priceToBeat },
+    lastSessionAt: base.lastSessionAt,
+    lastSessionSlotIndex: Number.isInteger(Number(raw.lastSessionSlotIndex))
+      ? Math.max(0, Math.min(SESSION_SLOTS_MINUTES.length - 1, Number(raw.lastSessionSlotIndex)))
+      : base.lastSessionSlotIndex,
   };
 
   Object.keys(BASE_TICKER_PRICES).forEach((ticker) => {
@@ -230,17 +350,23 @@ const sanitizeSessionState = (raw) => {
     }
   });
 
+  const parsedLast = new Date(String(raw.lastSessionAt || ""));
+  if (!Number.isNaN(parsedLast.getTime())) {
+    const normalized = getPrevOrCurrentSessionSlot(parsedLast);
+    next.lastSessionAt = normalized.toISOString();
+    next.lastSessionSlotIndex = getSessionSlotIndex(normalized);
+  }
+
   return next;
 };
 
 const sessionState = sanitizeSessionState(loadJsonFile(SESSION_STATE_FILE));
-// Bootstrap baseline for now: start from equal current/beat prices for all commodities.
-sessionState.skipSessionCount = 0;
-Object.keys(BASE_TICKER_PRICES).forEach((ticker) => {
-  sessionState.priceToBeat[ticker] = parseFloat(
-    Number(centralPrices[ticker]).toFixed(3),
-  );
-});
+sessionState.lastSessionAt = getPrevOrCurrentSessionSlot(
+  new Date(sessionState.lastSessionAt || getLatestHistoryTimestamp().toISOString()),
+).toISOString();
+sessionState.lastSessionSlotIndex = getSessionSlotIndex(
+  new Date(sessionState.lastSessionAt),
+);
 saveJsonFile(SESSION_STATE_FILE, sessionState);
 
 const generateChanceSeedHistory = (baseChance) => {
@@ -308,12 +434,13 @@ const sanitizeChancesData = (raw) => {
 const chancesData = sanitizeChancesData(loadJsonFile(CHANCES_FILE));
 saveJsonFile(CHANCES_FILE, chancesData);
 
-const updateChancesForTicker = (ticker) => {
+const updateChancesForTicker = (ticker, priceDelta = 0) => {
   const marketIds = MARKET_IDS_BY_TICKER[ticker] || [];
+  const direction =
+    priceDelta > 0 ? 1 : priceDelta < 0 ? -1 : Math.random() < 0.5 ? -1 : 1;
   marketIds.forEach((marketId) => {
     const current = Number(chancesData.currentChances[marketId]) || 50;
-    const magnitude = 5 + Math.random() * 5; // 5-10%
-    const direction = Math.random() < 0.5 ? -1 : 1;
+    const magnitude = 2 + Math.random() * 4; // 2-6% with price trend bias
     const next = clamp(current + direction * magnitude, 1, 99);
     const rounded = parseFloat(next.toFixed(2));
 
@@ -328,7 +455,7 @@ const updateChancesForTicker = (ticker) => {
   saveJsonFile(CHANCES_FILE, chancesData);
 };
 
-const addPriceEntry = (ticker, incomingPrice, source = "auto") => {
+const addPriceEntry = (ticker, incomingPrice, source = "auto", timestampOverride = null) => {
   const base = BASE_TICKER_PRICES[ticker];
   if (!base) return null;
 
@@ -339,7 +466,7 @@ const addPriceEntry = (ticker, incomingPrice, source = "auto") => {
 
   const entry = {
     price,
-    timestamp: new Date().toISOString(),
+    timestamp: timestampOverride || new Date().toISOString(),
     source,
   };
 
@@ -350,6 +477,7 @@ const addPriceEntry = (ticker, incomingPrice, source = "auto") => {
   centralPrices[ticker] = price;
   pricesData.currentPrices[ticker] = price;
   pricesData.statistics[ticker] = calculateStats(pricesData.priceHistory[ticker]);
+  updateChancesForTicker(ticker, price - prev);
 
   saveJsonFile(PRICES_FILE, pricesData);
   return entry;
@@ -366,8 +494,14 @@ const getNextSessionPrice = (ticker) => {
   return clamp(current * (1 + pct), lowerBound, upperBound);
 };
 
+const getActivityActorFromAccount = (account) => {
+  const name = String(account?.username || "").trim();
+  return name || "DEMO";
+};
+
 const settleDuePredictionPositions = () => {
   Object.values(accountStore.accounts).forEach((account) => {
+    const actor = getActivityActorFromAccount(account);
     const prediction = account.prediction;
     const stillOpen = [];
 
@@ -409,6 +543,9 @@ const settleDuePredictionPositions = () => {
         session: sessionState.skipSessionCount,
         note: `Settled after ${sessionsHeld} sessions`,
       });
+      appendActivity(
+        `${actor}: Settlement ${position.ticker} ${position.outcome === "YES" ? "UP" : "DOWN"} ${isWinningPosition ? "WIN" : "LOSS"}`,
+      );
     });
 
     prediction.openPositions = stillOpen;
@@ -419,32 +556,78 @@ const settleDuePredictionPositions = () => {
   saveJsonFile(ACCOUNT_FILE, accountStore);
 };
 
-const runSkipSessions = (sessionCount = 1) => {
+const runSkipSessions = (sessionCount = 1, actorName = "DEMO") => {
   const count = Math.max(1, Math.min(20, Number(sessionCount) || 1));
   const tickers = Object.keys(BASE_TICKER_PRICES);
 
   for (let s = 0; s < count; s++) {
+    const nextSessionAt = getNextSessionSlot(new Date(sessionState.lastSessionAt));
+    const nextSessionIso = nextSessionAt.toISOString();
+    sessionState.lastSessionAt = nextSessionIso;
+    sessionState.lastSessionSlotIndex =
+      (Number(sessionState.lastSessionSlotIndex || 0) + 1) %
+      SESSION_SLOTS_MINUTES.length;
+
     tickers.forEach((ticker) => {
       const next = getNextSessionPrice(ticker);
-      addPriceEntry(ticker, next, "session-skip");
-      updateChancesForTicker(ticker);
+      addPriceEntry(ticker, next, "session-skip", nextSessionIso);
     });
 
     sessionState.skipSessionCount += 1;
     settleDuePredictionPositions();
 
-    if (sessionState.skipSessionCount % 3 === 0) {
+    // Sync price-to-beat to current price at the 8:30 session.
+    const slotIndex = Number(sessionState.lastSessionSlotIndex || 0);
+    if (slotIndex === 0) {
       tickers.forEach((ticker) => {
         sessionState.priceToBeat[ticker] = parseFloat(
           Number(centralPrices[ticker]).toFixed(3),
         );
       });
+
+      // Daily markets reset to neutral 50/50 at the next-day 8:30 session.
+      ["2", "4"].forEach((dailyMarketId) => {
+        chancesData.currentChances[dailyMarketId] = 50;
+        chancesData.chanceHistory[dailyMarketId] = [50];
+      });
+      saveJsonFile(CHANCES_FILE, chancesData);
+    } else {
+      // Keep only the current daily cycle points (max 3 per day: 8:30, 12:00, 3:30).
+      const cyclePointsToKeep = Math.min(3, slotIndex + 1);
+      ["2", "4"].forEach((dailyMarketId) => {
+        if (!Array.isArray(chancesData.chanceHistory[dailyMarketId])) {
+          chancesData.chanceHistory[dailyMarketId] = [];
+        }
+        chancesData.chanceHistory[dailyMarketId] =
+          chancesData.chanceHistory[dailyMarketId].slice(-cyclePointsToKeep);
+      });
+      saveJsonFile(CHANCES_FILE, chancesData);
     }
   }
 
   saveJsonFile(SESSION_STATE_FILE, sessionState);
+  appendActivity(`${actorName}: Session skipped x${count}: prices and chances updated`);
 
   return count;
+};
+
+const buildLivePayload = (extra = {}) => {
+  return {
+    prices: centralPrices,
+    histories: getHistoriesForClient(),
+    historyTimestamps: getHistoryTimestampsForClient(),
+    priceToBeat: sessionState.priceToBeat,
+    chances: chancesData.currentChances,
+    chanceHistories: chancesData.chanceHistory,
+    timestamp: Date.now(),
+    ...extra,
+  };
+};
+
+const broadcastLiveUpdate = (extra = {}) => {
+  const payload = buildLivePayload(extra);
+  io.emit("pricesUpdated", payload);
+  return payload;
 };
 
 const buildAccountStore = () => ({
@@ -462,7 +645,7 @@ const resetAccountStore = () => {
 
 const buildDefaultGuestAccount = () => ({
   username: "DEMO",
-  cashBalance: 1240,
+  cashBalance: 1000,
   portfolioPnL: 0,
   synthetic: {
     nextPositionId: 1,
@@ -721,7 +904,7 @@ const recalculatePortfolioPnL = (account) => {
 
 const ensureAccountShape = (account) => {
   if (!account || typeof account !== "object") return buildDefaultGuestAccount();
-  const nextCash = Math.max(0, toFiniteNumber(account.cashBalance, 1240));
+  const nextCash = Math.max(0, toFiniteNumber(account.cashBalance, 1000));
   const nextPortfolio = toFiniteNumber(account.portfolioPnL, 0);
   const normalized = {
     username: account.username || "DEMO",
@@ -842,6 +1025,7 @@ const executeSyntheticTrade = ({ account, side, ticker, amount }) => {
   }
 
   const synthetic = account.synthetic;
+  const actor = getActivityActorFromAccount(account);
   const quote = getSyntheticQuote(ticker);
   const nowIso = new Date().toISOString();
 
@@ -872,6 +1056,7 @@ const executeSyntheticTrade = ({ account, side, ticker, amount }) => {
       realizedPnl: 0,
       createdAt: nowIso,
     });
+    appendActivity(`${actor}: Spot BUY ${ticker} ($${usdAmount.toFixed(2)})`);
   } else if (side === "SELL") {
     const totalOwnedUnits = synthetic.openPositions
       .filter((position) => position.ticker === ticker)
@@ -932,6 +1117,7 @@ const executeSyntheticTrade = ({ account, side, ticker, amount }) => {
       realizedPnl: parseFloat(realizedPnl.toFixed(4)),
       createdAt: nowIso,
     });
+    appendActivity(`${actor}: Spot SELL ${ticker} ($${usdAmount.toFixed(2)})`);
   } else {
     return { ok: false, error: "Invalid side" };
   }
@@ -965,7 +1151,7 @@ if (loadedAccountData?.accounts && typeof loadedAccountData.accounts === "object
   accountStore.accounts["guest-default"] = {
     username: loadedAccountData.username || "DEMO",
     cashBalance: parseFloat(
-      Math.max(0, toFiniteNumber(loadedAccountData.cashBalance, 1240)).toFixed(2),
+      Math.max(0, toFiniteNumber(loadedAccountData.cashBalance, 1000)).toFixed(2),
     ),
     portfolioPnL: parseFloat(
       toFiniteNumber(loadedAccountData.portfolioPnL, 0).toFixed(2),
@@ -995,9 +1181,20 @@ const getOrCreateGuestAccount = (guestId) => {
   return normalized;
 };
 
+const getActivityActorFromGuestId = (guestId) => {
+  const account = getOrCreateGuestAccount(guestId);
+  return getActivityActorFromAccount(account);
+};
+
 const getHistoriesForClient = () =>
   Object.keys(pricesData.priceHistory).reduce((acc, ticker) => {
     acc[ticker] = pricesData.priceHistory[ticker].map((p) => p.price);
+    return acc;
+  }, {});
+
+const getHistoryTimestampsForClient = () =>
+  Object.keys(pricesData.priceHistory).reduce((acc, ticker) => {
+    acc[ticker] = pricesData.priceHistory[ticker].map((p) => p.timestamp);
     return acc;
   }, {});
 
@@ -1019,6 +1216,7 @@ const executePredictionTrade = ({
 
   const price = getCurrentContractPrice(marketId, outcome);
   const prediction = account.prediction;
+  const actor = getActivityActorFromAccount(account);
   const nowIso = new Date().toISOString();
 
   if (side === "BUY") {
@@ -1067,6 +1265,9 @@ const executePredictionTrade = ({
       realizedPnl: 0,
       session: sessionState.skipSessionCount,
     });
+    appendActivity(
+      `${actor}: Prediction BUY ${outcome === "YES" ? "UP" : "DOWN"} ${market.ticker} ($${buyAmount.toFixed(2)})`,
+    );
   } else if (side === "SELL") {
     const contractsToSell = Number(contracts);
     if (!Number.isFinite(contractsToSell) || contractsToSell <= 0) {
@@ -1148,6 +1349,9 @@ const executePredictionTrade = ({
       realizedPnl: parseFloat(realizedPnl.toFixed(4)),
       session: sessionState.skipSessionCount,
     });
+    appendActivity(
+      `${actor}: Prediction SELL ${outcome === "YES" ? "UP" : "DOWN"} ${market.ticker} (${soldContracts.toFixed(2)} cts)`,
+    );
   } else {
     return { ok: false, error: "Invalid side" };
   }
@@ -1166,14 +1370,8 @@ const executePredictionTrade = ({
 io.on("connection", (socket) => {
   console.log(`Client connected: ${socket.id} (Total: ${io.engine.clientsCount})`);
 
-  socket.emit("pricesUpdated", {
-    prices: centralPrices,
-    histories: getHistoriesForClient(),
-    priceToBeat: sessionState.priceToBeat,
-    chances: chancesData.currentChances,
-    chanceHistories: chancesData.chanceHistory,
-    timestamp: Date.now(),
-  });
+  socket.emit("pricesUpdated", buildLivePayload());
+  socket.emit("activityUpdated", { activityFeed: activityData.items });
 
   socket.on("updatePrice", (data) => {
     const { ticker, price } = data || {};
@@ -1181,29 +1379,17 @@ io.on("connection", (socket) => {
 
     const added = addPriceEntry(ticker, price, "manual-update");
     if (!added) return;
-    updateChancesForTicker(ticker);
+    // chances update is tied to the price move inside addPriceEntry
+    appendActivity(`Price updated: ${ticker} -> $${Number(price).toFixed(3)}`);
 
-    io.emit("pricesUpdated", {
-      prices: centralPrices,
-      histories: getHistoriesForClient(),
-      priceToBeat: sessionState.priceToBeat,
-      chances: chancesData.currentChances,
-      chanceHistories: chancesData.chanceHistory,
-      timestamp: Date.now(),
-    });
+    broadcastLiveUpdate();
   });
 
   socket.on("skipSessionsAll", (data, ack) => {
-    const count = runSkipSessions(data?.count);
-    io.emit("pricesUpdated", {
-      prices: centralPrices,
-      histories: getHistoriesForClient(),
-      priceToBeat: sessionState.priceToBeat,
-      chances: chancesData.currentChances,
-      chanceHistories: chancesData.chanceHistory,
-      skippedSessions: count,
-      timestamp: Date.now(),
-    });
+    const guestId = sanitizeGuestId(data?.guestId) || "guest-default";
+    const actor = getActivityActorFromGuestId(guestId);
+    const count = runSkipSessions(data?.count, actor);
+    broadcastLiveUpdate({ skippedSessions: count });
     if (typeof ack === "function") {
       ack({ ok: true, skippedSessions: count });
     }
@@ -1216,13 +1402,8 @@ io.on("connection", (socket) => {
 
 app.get("/api/prices", (req, res) => {
   res.json({
-    prices: centralPrices,
-    histories: getHistoriesForClient(),
-    priceToBeat: sessionState.priceToBeat,
-    chances: chancesData.currentChances,
-    chanceHistories: chancesData.chanceHistory,
+    ...buildLivePayload(),
     statistics: pricesData.statistics,
-    timestamp: Date.now(),
   });
 });
 
@@ -1238,49 +1419,31 @@ app.post("/api/prices", (req, res) => {
     res.status(400).json({ error: "Invalid ticker or price" });
     return;
   }
-  updateChancesForTicker(ticker);
+  // chances update is tied to the price move inside addPriceEntry
 
-  io.emit("pricesUpdated", {
-    prices: centralPrices,
-    histories: getHistoriesForClient(),
-    priceToBeat: sessionState.priceToBeat,
-    chances: chancesData.currentChances,
-    chanceHistories: chancesData.chanceHistory,
-    timestamp: Date.now(),
-  });
+  broadcastLiveUpdate();
 
   res.json({
     success: true,
-    prices: centralPrices,
-    priceToBeat: sessionState.priceToBeat,
-    chances: chancesData.currentChances,
-    chanceHistories: chancesData.chanceHistory,
+    ...buildLivePayload(),
     statistics: pricesData.statistics,
   });
 });
 
 app.post("/api/sessions/skip", (req, res) => {
-  const count = runSkipSessions(req.body?.count);
+  const guestId =
+    resolveGuestId(req) ||
+    sanitizeGuestId(req.body?.guestId) ||
+    "guest-default";
+  const actor = getActivityActorFromGuestId(guestId);
+  const count = runSkipSessions(req.body?.count, actor);
 
-  io.emit("pricesUpdated", {
-    prices: centralPrices,
-    histories: getHistoriesForClient(),
-    priceToBeat: sessionState.priceToBeat,
-    chances: chancesData.currentChances,
-    chanceHistories: chancesData.chanceHistory,
-    skippedSessions: count,
-    timestamp: Date.now(),
-  });
+  const payload = broadcastLiveUpdate({ skippedSessions: count });
 
   res.json({
     success: true,
     skippedSessions: count,
-    prices: centralPrices,
-    histories: getHistoriesForClient(),
-    priceToBeat: sessionState.priceToBeat,
-    chances: chancesData.currentChances,
-    chanceHistories: chancesData.chanceHistory,
-    timestamp: Date.now(),
+    ...payload,
   });
 });
 
@@ -1314,6 +1477,7 @@ app.post("/api/account/deposit", (req, res) => {
   account.updatedAt = new Date().toISOString();
   recalculatePortfolioPnL(account);
   saveJsonFile(ACCOUNT_FILE, accountStore);
+  appendActivity(`${getActivityActorFromAccount(account)}: Deposit +$${amount.toFixed(2)}`);
 
   res.json({
     success: true,
@@ -1326,11 +1490,48 @@ app.post("/api/account/deposit", (req, res) => {
   });
 });
 
-app.post("/api/account/reset", (req, res) => {
-  resetAccountStore();
+app.post("/api/account/username", (req, res) => {
+  const guestId = resolveGuestId(req);
+  const account = getOrCreateGuestAccount(guestId);
+  const rawUsername = String(req.body?.username || "").trim();
+
+  if (!rawUsername) {
+    res.status(400).json({ error: "Username is required" });
+    return;
+  }
+  if (rawUsername.length < 3 || rawUsername.length > 20) {
+    res.status(400).json({ error: "Username must be 3-20 characters" });
+    return;
+  }
+  if (!/^[A-Za-z0-9_]+$/.test(rawUsername)) {
+    res
+      .status(400)
+      .json({ error: "Username can use letters, numbers, and underscore only" });
+    return;
+  }
+
+  account.username = rawUsername;
+  account.updatedAt = new Date().toISOString();
+  saveJsonFile(ACCOUNT_FILE, accountStore);
+
   res.json({
     success: true,
-    message: "All demo guest accounts reset",
+    guestId,
+    account,
+    synthetic: buildSyntheticSnapshot(account),
+    prediction: buildPredictionSnapshot(account),
+    timestamp: Date.now(),
+  });
+});
+
+app.post("/api/account/reset", (req, res) => {
+  const guestId = resolveGuestId(req);
+  accountStore.accounts[guestId] = ensureAccountShape(buildDefaultGuestAccount());
+  saveJsonFile(ACCOUNT_FILE, accountStore);
+  res.json({
+    success: true,
+    guestId,
+    message: "Demo account reset",
     timestamp: Date.now(),
   });
 });
@@ -1431,6 +1632,13 @@ app.get("/api/health", (req, res) => {
 
 app.get("/api/history", (req, res) => {
   res.json(pricesData);
+});
+
+app.get("/api/activity", (req, res) => {
+  res.json({
+    activityFeed: activityData.items,
+    timestamp: Date.now(),
+  });
 });
 
 app.get("/api/chances", (req, res) => {

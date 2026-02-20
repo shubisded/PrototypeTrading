@@ -1,39 +1,152 @@
 {
   "metadata": {
-    "createdAt": "2026-02-14T20:59:18.381Z",
+    "createdAt": "2026-02-18T19:26:21.943Z",
     "version": "2.0"
   },
   "accounts": {
     "guest-1e423e89-f67c-4d9a-aff3-58a2041514c1": {
-      "username": "DEMO",
-      "cashBalance": 2866.3,
+      "username": "shubh",
+      "cashBalance": 1000,
       "portfolioPnL": 0,
       "synthetic": {
-        "nextPositionId": 3,
-        "nextOrderId": 5,
+        "nextPositionId": 1,
+        "nextOrderId": 1,
+        "openPositions": [],
+        "orderHistory": []
+      },
+      "prediction": {
+        "realizedPnL": 0,
+        "nextPositionId": 2,
+        "nextOrderId": 3,
         "openPositions": [],
         "orderHistory": [
           {
             "id": 2,
             "type": "SELL",
-            "ticker": "DDR5",
-            "units": 16.14205,
-            "price": 38.409,
-            "amount": 620,
+            "marketId": "2",
+            "ticker": "DDR5-DAILY",
+            "category": "DDR5",
+            "period": "DAILY",
+            "outcome": "YES",
+            "contracts": 2151.463,
+            "price": 0.4648,
+            "amount": 1000,
             "realizedPnl": 0,
-            "createdAt": "2026-02-14T21:17:43.978Z"
+            "session": 80,
+            "createdAt": "2026-02-19T18:36:12.291Z"
           },
           {
             "id": 1,
             "type": "BUY",
-            "ticker": "DDR5",
-            "units": 16.14205,
-            "price": 38.409,
-            "amount": 620,
+            "marketId": "2",
+            "ticker": "DDR5-DAILY",
+            "category": "DDR5",
+            "period": "DAILY",
+            "outcome": "YES",
+            "contracts": 2151.463,
+            "price": 0.4648,
+            "amount": 1000,
             "realizedPnl": 0,
-            "createdAt": "2026-02-14T21:17:21.401Z"
+            "session": 80,
+            "createdAt": "2026-02-19T18:35:54.633Z"
           }
         ]
+      },
+      "createdAt": "2026-02-19T18:35:01.647Z",
+      "updatedAt": "2026-02-20T13:04:27.312Z"
+    },
+    "guest-b8daa2d2-161d-4730-9589-23a36890cc41": {
+      "username": "drunkk",
+      "cashBalance": 2117.2,
+      "portfolioPnL": 0,
+      "synthetic": {
+        "nextPositionId": 1,
+        "nextOrderId": 1,
+        "openPositions": [],
+        "orderHistory": []
+      },
+      "prediction": {
+        "realizedPnL": 1117.2,
+        "nextPositionId": 3,
+        "nextOrderId": 5,
+        "openPositions": [],
+        "orderHistory": [
+          {
+            "id": 4,
+            "type": "SELL",
+            "marketId": "2",
+            "ticker": "DDR5-DAILY",
+            "category": "DDR5",
+            "period": "DAILY",
+            "outcome": "YES",
+            "contracts": 4000,
+            "price": 0.5293,
+            "amount": 2117.2,
+            "realizedPnl": 117.2,
+            "session": 77,
+            "createdAt": "2026-02-19T16:35:43.710Z"
+          },
+          {
+            "id": 3,
+            "type": "BUY",
+            "marketId": "2",
+            "ticker": "DDR5-DAILY",
+            "category": "DDR5",
+            "period": "DAILY",
+            "outcome": "YES",
+            "contracts": 4000,
+            "price": 0.5,
+            "amount": 2000,
+            "realizedPnl": 0,
+            "session": 76,
+            "createdAt": "2026-02-19T16:35:17.637Z"
+          },
+          {
+            "id": 2,
+            "type": "SETTLEMENT",
+            "marketId": "2",
+            "ticker": "DDR5-DAILY",
+            "category": "DDR5",
+            "period": "DAILY",
+            "outcome": "YES",
+            "contracts": 2000,
+            "price": 1,
+            "amount": 2000,
+            "realizedPnl": 1000,
+            "result": "WIN",
+            "session": 76,
+            "note": "Settled after 3 sessions",
+            "createdAt": "2026-02-19T16:35:02.522Z"
+          },
+          {
+            "id": 1,
+            "type": "BUY",
+            "marketId": "2",
+            "ticker": "DDR5-DAILY",
+            "category": "DDR5",
+            "period": "DAILY",
+            "outcome": "YES",
+            "contracts": 2000,
+            "price": 0.5,
+            "amount": 1000,
+            "realizedPnl": 0,
+            "session": 73,
+            "createdAt": "2026-02-19T16:34:04.429Z"
+          }
+        ]
+      },
+      "createdAt": "2026-02-19T09:47:38.152Z",
+      "updatedAt": "2026-02-20T13:04:27.312Z"
+    },
+    "guest-1771523454494-62k7ir00": {
+      "username": "DEMO",
+      "cashBalance": 1000,
+      "portfolioPnL": 0,
+      "synthetic": {
+        "nextPositionId": 1,
+        "nextOrderId": 1,
+        "openPositions": [],
+        "orderHistory": []
       },
       "prediction": {
         "realizedPnL": 0,
@@ -42,8 +155,79 @@
         "openPositions": [],
         "orderHistory": []
       },
-      "createdAt": "2026-02-14T20:59:18.479Z",
-      "updatedAt": "2026-02-14T21:46:33.048Z"
+      "createdAt": "2026-02-19T17:51:13.412Z",
+      "updatedAt": "2026-02-20T13:04:27.312Z"
+    },
+    "guest-8a7739c4-8546-417e-98e2-ef70e1759187": {
+      "username": "DEMO",
+      "cashBalance": 1000,
+      "portfolioPnL": 0,
+      "synthetic": {
+        "nextPositionId": 1,
+        "nextOrderId": 1,
+        "openPositions": [],
+        "orderHistory": []
+      },
+      "prediction": {
+        "realizedPnL": 0,
+        "nextPositionId": 1,
+        "nextOrderId": 1,
+        "openPositions": [],
+        "orderHistory": []
+      },
+      "createdAt": "2026-02-19T18:43:46.313Z",
+      "updatedAt": "2026-02-20T13:04:27.312Z"
+    },
+    "guest-76c3629f-ddde-4415-bdf1-5bf54e254164": {
+      "username": "hii",
+      "cashBalance": 1000,
+      "portfolioPnL": 0,
+      "synthetic": {
+        "nextPositionId": 1,
+        "nextOrderId": 1,
+        "openPositions": [],
+        "orderHistory": []
+      },
+      "prediction": {
+        "realizedPnL": 0,
+        "nextPositionId": 2,
+        "nextOrderId": 3,
+        "openPositions": [],
+        "orderHistory": [
+          {
+            "id": 2,
+            "type": "SELL",
+            "marketId": "2",
+            "ticker": "DDR5-DAILY",
+            "category": "DDR5",
+            "period": "DAILY",
+            "outcome": "YES",
+            "contracts": 2151.463,
+            "price": 0.4648,
+            "amount": 1000,
+            "realizedPnl": 0,
+            "session": 80,
+            "createdAt": "2026-02-20T12:32:30.279Z"
+          },
+          {
+            "id": 1,
+            "type": "BUY",
+            "marketId": "2",
+            "ticker": "DDR5-DAILY",
+            "category": "DDR5",
+            "period": "DAILY",
+            "outcome": "YES",
+            "contracts": 2151.463,
+            "price": 0.4648,
+            "amount": 1000,
+            "realizedPnl": 0,
+            "session": 80,
+            "createdAt": "2026-02-20T12:32:18.899Z"
+          }
+        ]
+      },
+      "createdAt": "2026-02-20T12:31:17.612Z",
+      "updatedAt": "2026-02-20T13:04:27.312Z"
     }
   }
 }

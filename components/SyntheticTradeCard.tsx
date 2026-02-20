@@ -183,11 +183,11 @@ const SyntheticTradeCard: React.FC<Props> = ({
   };
 
   return (
-    <div className="w-full bg-[#0c1515] border border-[#1a2e2e] rounded-2xl overflow-hidden shadow-2xl flex flex-col min-h-[480px] relative">
+    <div className="w-full bg-[#0c1515] border border-[#1a2e2e] rounded-2xl overflow-hidden shadow-2xl flex flex-col relative">
       <div className="flex bg-[#040b0b] border-b border-[#1a2e2e] shrink-0">
         <button
           onClick={() => setActiveTab("BUY")}
-          className={`flex-1 py-4 text-[11px] font-bold uppercase tracking-[0.3em] transition-all relative ${
+          className={`flex-1 py-5 text-[14px] font-extrabold uppercase tracking-[0.16em] transition-all relative ${
             activeTab === "BUY"
               ? "text-[#2ed3b7] bg-[#0d1c1c]"
               : "text-[#7f8c8d] hover:text-[#2ed3b7] hover:bg-[#0d1c1c]/30"
@@ -200,7 +200,7 @@ const SyntheticTradeCard: React.FC<Props> = ({
         </button>
         <button
           onClick={() => setActiveTab("SELL")}
-          className={`flex-1 py-4 text-[11px] font-bold uppercase tracking-[0.3em] transition-all relative ${
+          className={`flex-1 py-5 text-[14px] font-extrabold uppercase tracking-[0.16em] transition-all relative ${
             activeTab === "SELL"
               ? "text-rose-500 bg-[#1c0d0d]/30"
               : "text-[#7f8c8d] hover:text-rose-400 hover:bg-[#1c0d0d]/10"
@@ -213,7 +213,7 @@ const SyntheticTradeCard: React.FC<Props> = ({
         </button>
       </div>
 
-      <div className="flex-grow overflow-y-auto custom-scrollbar p-6 space-y-5">
+      <div className="p-6 space-y-5">
         <div className="flex justify-between items-center px-1">
           <span className="text-[10px] font-bold text-[#7f8c8d] uppercase tracking-widest">
             {activeTab === "BUY" ? "Current Ask" : "Current Bid"}
