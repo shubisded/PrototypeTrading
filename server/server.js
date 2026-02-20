@@ -315,11 +315,15 @@ const getNextSessionSlotFromIndex = (fromDate, slotIndex) => {
   return date;
 };
 
-const getSessionSlotIndex = (date) => {
-  const minutes = date.getUTCHours() * 60 + date.getUTCMinutes();
-  return SESSION_SLOTS_MINUTES.findIndex((slot) => slot === minutes);
+const alignTimestampToSlotIndex = (baseDate, slotIndex) => {
+  const date = new Date(baseDate);
+  const safeIndex = Number.isInteger(Number(slotIndex))
+    ? Math.max(0, Math.min(SESSION_SLOTS_MINUTES.length - 1, Number(slotIndex)))
+    : 0;
+  const slotMinutes = SESSION_SLOTS_MINUTES[safeIndex];
+  date.setUTCHours(Math.floor(slotMinutes / 60), slotMinutes % 60, 0, 0);
+  return date;
 };
-
 const reconcileSessionSlotIndexFromTimestamp = () => {
   const parsed = new Date(String(sessionState.lastSessionAt || ""));
   if (Number.isNaN(parsed.getTime())) return;
@@ -405,6 +409,10 @@ const sessionState = sanitizeSessionState(loadJsonFile(SESSION_STATE_FILE));
 if (!Number.isInteger(Number(sessionState.lastSessionSlotIndex))) {
   sessionState.lastSessionSlotIndex = 0;
 }
+sessionState.lastSessionAt = alignTimestampToSlotIndex(
+  new Date(sessionState.lastSessionAt || getLatestHistoryTimestamp().toISOString()),
+  sessionState.lastSessionSlotIndex,
+).toISOString();
 saveJsonFile(SESSION_STATE_FILE, sessionState);
 
 const generateChanceSeedHistory = (baseChance) => {
@@ -595,7 +603,6 @@ const settleDuePredictionPositions = () => {
 };
 
 const runSkipSessions = (sessionCount = 1, actorName = "DEMO") => {
-  reconcileSessionSlotIndexFromTimestamp();
   const count = Math.max(1, Math.min(20, Number(sessionCount) || 1));
   const tickers = Object.keys(BASE_TICKER_PRICES);
 
@@ -1469,6 +1476,23 @@ app.post("/api/prices", (req, res) => {
   });
 });
 
+app.post("/api/sessions/reconcile", (req, res) => {
+  const latest = getLatestHistoryTimestamp();
+  const parsed = Number.isFinite(latest?.getTime?.()) ? latest : new Date();
+  const derived = getSessionSlotIndex(parsed);
+  sessionState.lastSessionSlotIndex = derived >= 0 ? derived : 0;
+  sessionState.lastSessionAt = alignTimestampToSlotIndex(
+    parsed,
+    sessionState.lastSessionSlotIndex,
+  ).toISOString();
+  saveJsonFile(SESSION_STATE_FILE, sessionState);
+
+  res.json({
+    ok: true,
+    lastSessionAt: sessionState.lastSessionAt,
+    lastSessionSlotIndex: sessionState.lastSessionSlotIndex,
+  });
+});
 app.post("/api/sessions/skip", (req, res) => {
   const guestId =
     resolveGuestId(req) ||
@@ -1694,6 +1718,8 @@ httpServer.listen(PORT, () => {
   console.log(`Prices file: ${PRICES_FILE}`);
   console.log(`Account file: ${ACCOUNT_FILE}`);
 });
+
+
 
 
 

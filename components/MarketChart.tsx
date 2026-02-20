@@ -67,7 +67,7 @@ const MarketChart: React.FC<Props> = ({
 
     const getSlotAligned = (date: Date) => {
       const aligned = new Date(date);
-      const nowMinutes = aligned.getHours() * 60 + aligned.getMinutes();
+      const nowMinutes = aligned.getUTCHours() * 60 + aligned.getUTCMinutes();
       let slotIdx = -1;
 
       for (let i = SESSION_SLOTS_MINUTES.length - 1; i >= 0; i--) {
@@ -78,28 +78,38 @@ const MarketChart: React.FC<Props> = ({
       }
 
       if (slotIdx < 0) {
-        aligned.setDate(aligned.getDate() - 1);
+        aligned.setUTCDate(aligned.getUTCDate() - 1);
         slotIdx = SESSION_SLOTS_MINUTES.length - 1;
       }
 
       const slotMinutes = SESSION_SLOTS_MINUTES[slotIdx];
-      aligned.setHours(Math.floor(slotMinutes / 60), slotMinutes % 60, 0, 0);
+      aligned.setUTCHours(
+        Math.floor(slotMinutes / 60),
+        slotMinutes % 60,
+        0,
+        0,
+      );
       return aligned;
     };
 
     const getPrevSlot = (date: Date) => {
       const prev = new Date(date);
-      const minutes = prev.getHours() * 60 + prev.getMinutes();
+      const minutes = prev.getUTCHours() * 60 + prev.getUTCMinutes();
       const idx = SESSION_SLOTS_MINUTES.findIndex((slot) => slot === minutes);
       if (idx > 0) {
         const slotMinutes = SESSION_SLOTS_MINUTES[idx - 1];
-        prev.setHours(Math.floor(slotMinutes / 60), slotMinutes % 60, 0, 0);
+        prev.setUTCHours(
+          Math.floor(slotMinutes / 60),
+          slotMinutes % 60,
+          0,
+          0,
+        );
         return prev;
       }
 
-      prev.setDate(prev.getDate() - 1);
+      prev.setUTCDate(prev.getUTCDate() - 1);
       const lastSlot = SESSION_SLOTS_MINUTES[SESSION_SLOTS_MINUTES.length - 1];
-      prev.setHours(Math.floor(lastSlot / 60), lastSlot % 60, 0, 0);
+      prev.setUTCHours(Math.floor(lastSlot / 60), lastSlot % 60, 0, 0);
       return prev;
     };
 
@@ -620,6 +630,7 @@ const MarketChart: React.FC<Props> = ({
 };
 
 export default MarketChart;
+
 
 
 
