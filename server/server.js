@@ -853,14 +853,6 @@ const sanitizeSyntheticState = (raw) => {
             units: parseFloat(units.toFixed(6)),
             avgEntryPrice: parseFloat(avgEntryPrice.toFixed(4)),
             investedAmount: parseFloat(investedAmount.toFixed(4)),
-            settlementAt:
-              market.period === "MONTHLY"
-                ? (() => {
-                    const candidate = new Date(String(position?.settlementAt || ""));
-                    if (!Number.isNaN(candidate.getTime())) return candidate.toISOString();
-                    return getMonthlySettlementAt(position?.createdAt || new Date().toISOString());
-                  })()
-                : null,
             createdAt: position?.createdAt || new Date().toISOString(),
             updatedAt: position?.updatedAt || new Date().toISOString(),
           };
@@ -1852,20 +1844,4 @@ httpServer.listen(PORT, () => {
   console.log(`Prices file: ${PRICES_FILE}`);
   console.log(`Account file: ${ACCOUNT_FILE}`);
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
