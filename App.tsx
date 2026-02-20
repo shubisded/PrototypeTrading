@@ -158,6 +158,51 @@ const INITIAL_TICKER_PRICES: Record<string, number> = {
   DDR4: 78.409,
 };
 const PREDICTION_ONBOARDING_KEY_PREFIX = "siliconpredict.predictionOnboardingSeen";
+const ACCOUNT_CACHE_KEY_PREFIX = "siliconpredict.accountCache";
+
+type CachedAccountState = {
+  username: string;
+  cashBalance?: number;
+  portfolioPnL?: number;
+};
+
+const getAccountCacheKey = (guestId: string): string =>
+  `${ACCOUNT_CACHE_KEY_PREFIX}:${guestId}`;
+
+const readCachedAccount = (guestId: string): CachedAccountState | null => {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.localStorage.getItem(getAccountCacheKey(guestId));
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    const username = String(parsed?.username || "").trim();
+    if (!username) return null;
+    return {
+      username,
+      cashBalance: Number(parsed?.cashBalance) || 0,
+      portfolioPnL: Number(parsed?.portfolioPnL) || 0,
+    };
+  } catch {
+    return null;
+  }
+};
+
+const writeCachedAccount = (guestId: string, account: CachedAccountState): void => {
+  if (typeof window === "undefined") return;
+  try {
+    const normalizedUsername = String(account.username || "").trim() || "DEMO";
+    window.localStorage.setItem(
+      getAccountCacheKey(guestId),
+      JSON.stringify({
+        username: normalizedUsername,
+        cashBalance: Number(account.cashBalance) || 0,
+        portfolioPnL: Number(account.portfolioPnL) || 0,
+      }),
+    );
+  } catch {
+    // ignore storage failures
+  }
+};
 
 const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<ViewState>(() => {
@@ -278,9 +323,19 @@ const App: React.FC = () => {
   const [resetTooltipPos, setResetTooltipPos] = useState({ x: 0, y: 0 });
   const resetButtonRef = useRef<HTMLButtonElement | null>(null);
   const [showPredictionOnboarding, setShowPredictionOnboarding] = useState(false);
-  const [usernameReady, setUsernameReady] = useState(false);
-  const [accountUsername, setAccountUsername] = useState("DEMO");
-  const [usernameCheckComplete, setUsernameCheckComplete] = useState(false);
+  const cachedAccountAtBoot = readCachedAccount(guestId);
+  const [usernameReady, setUsernameReady] = useState(
+    Boolean(
+      cachedAccountAtBoot?.username &&
+        cachedAccountAtBoot.username.trim() !== "DEMO",
+    ),
+  );
+  const [accountUsername, setAccountUsername] = useState(
+    cachedAccountAtBoot?.username || "DEMO",
+  );
+  const [usernameCheckComplete, setUsernameCheckComplete] = useState(
+    Boolean(cachedAccountAtBoot?.username),
+  );
   const previousViewRef = useRef<ViewState>("LANDING");
 
   const currentPrice = tickerPrices[selectedTicker] || 0;
@@ -498,6 +553,11 @@ const App: React.FC = () => {
         });
       }
       if (data?.account) {
+        writeCachedAccount(guestId, {
+          username: data.account.username || "DEMO",
+          cashBalance: Number(data.account.cashBalance) || 0,
+          portfolioPnL: Number(data.account.portfolioPnL) || 0,
+        });
         window.dispatchEvent(
           new CustomEvent("accountUpdated", {
             detail: {
@@ -533,6 +593,11 @@ const App: React.FC = () => {
         });
       }
       if (data?.account) {
+        writeCachedAccount(guestId, {
+          username: data.account.username || "DEMO",
+          cashBalance: Number(data.account.cashBalance) || 0,
+          portfolioPnL: Number(data.account.portfolioPnL) || 0,
+        });
         window.dispatchEvent(
           new CustomEvent("accountUpdated", {
             detail: {
@@ -556,7 +621,7 @@ const App: React.FC = () => {
       void refreshPredictionPortfolio();
       void refreshSyntheticPortfolio();
     }, 350);
-  }, [refreshPredictionPortfolio, refreshSyntheticPortfolio]);
+  }, [refreshPredictionPortfolio, refreshSyntheticPortfolio, guestId]);
 
 
   // Connect to Socket.io server
@@ -701,7 +766,13 @@ const App: React.FC = () => {
 
   useEffect(() => {
     const socketURL = getBackendBaseURL();
-    setUsernameCheckComplete(false);
+    const cached = readCachedAccount(guestId);
+    if (cached?.username) {
+      setAccountUsername(cached.username);
+      setUsernameReady(cached.username !== "DEMO");
+      setUsernameCheckComplete(true);
+    }
+
     fetch(`${socketURL}/api/account`, {
       headers: { "x-guest-id": guestId },
     })
@@ -710,8 +781,20 @@ const App: React.FC = () => {
         const nextUsername = String(data?.account?.username || "DEMO").trim();
         setAccountUsername(nextUsername || "DEMO");
         setUsernameReady(Boolean(nextUsername) && nextUsername !== "DEMO");
+        writeCachedAccount(guestId, {
+          username: nextUsername || "DEMO",
+          cashBalance: Number(data?.account?.cashBalance) || cached?.cashBalance || 0,
+          portfolioPnL:
+            Number(data?.account?.portfolioPnL) || cached?.portfolioPnL || 0,
+        });
       })
       .catch(() => {
+        const fallback = readCachedAccount(guestId);
+        if (fallback?.username) {
+          setAccountUsername(fallback.username);
+          setUsernameReady(fallback.username !== "DEMO");
+          return;
+        }
         setAccountUsername("DEMO");
         setUsernameReady(false);
       })
@@ -722,19 +805,48 @@ const App: React.FC = () => {
 
   useEffect(() => {
     const onAccountUpdated = (event: Event) => {
-      const custom = event as CustomEvent<{ source?: string; username?: string }>;
+      const custom = event as CustomEvent<{
+        source?: string;
+        username?: string;
+        cashBalance?: number;
+        portfolioPnL?: number;
+      }>;
+      const previousCached = readCachedAccount(guestId);
+      const nextCash = Number(custom.detail?.cashBalance);
+      const nextPortfolio = Number(custom.detail?.portfolioPnL);
+
       if (typeof custom.detail?.username === "string") {
         const nextUsername = custom.detail.username.trim();
         setAccountUsername(nextUsername || "DEMO");
         setUsernameReady(Boolean(nextUsername) && nextUsername !== "DEMO");
+        writeCachedAccount(guestId, {
+          username: nextUsername || "DEMO",
+          cashBalance: Number.isFinite(nextCash)
+            ? nextCash
+            : previousCached?.cashBalance || 0,
+          portfolioPnL: Number.isFinite(nextPortfolio)
+            ? nextPortfolio
+            : previousCached?.portfolioPnL || 0,
+        });
+      } else if (Number.isFinite(nextCash) || Number.isFinite(nextPortfolio)) {
+        writeCachedAccount(guestId, {
+          username: accountUsername || previousCached?.username || "DEMO",
+          cashBalance: Number.isFinite(nextCash)
+            ? nextCash
+            : previousCached?.cashBalance || 0,
+          portfolioPnL: Number.isFinite(nextPortfolio)
+            ? nextPortfolio
+            : previousCached?.portfolioPnL || 0,
+        });
       }
+
       if (custom.detail?.source === "sync") return;
       void refreshPredictionPortfolio();
       void refreshSyntheticPortfolio();
     };
     window.addEventListener("accountUpdated", onAccountUpdated);
     return () => window.removeEventListener("accountUpdated", onAccountUpdated);
-  }, [refreshPredictionPortfolio, refreshSyntheticPortfolio]);
+  }, [refreshPredictionPortfolio, refreshSyntheticPortfolio, guestId, accountUsername]);
 
   const handleSetUsername = React.useCallback(
     async (username: string): Promise<{ ok: boolean; error?: string }> => {
@@ -761,6 +873,11 @@ const App: React.FC = () => {
         const nextUsername = String(data.account.username || "").trim();
         setAccountUsername(nextUsername || "DEMO");
         setUsernameReady(Boolean(nextUsername) && nextUsername !== "DEMO");
+        writeCachedAccount(guestId, {
+          username: nextUsername || "DEMO",
+          cashBalance: Number(data.account.cashBalance) || 0,
+          portfolioPnL: Number(data.account.portfolioPnL) || 0,
+        });
         window.dispatchEvent(
           new CustomEvent("accountUpdated", {
             detail: {
@@ -1641,6 +1758,13 @@ const App: React.FC = () => {
 };
 
 export default App;
+
+
+
+
+
+
+
 
 
 

@@ -19,15 +19,70 @@ const emitAccountUpdated = (account: {
   window.dispatchEvent(new CustomEvent("accountUpdated", { detail: account }));
 };
 
-const Navbar: React.FC<Props> = ({ onHome }) => {
-  const [cashBalance, setCashBalance] = useState(INITIAL_CASH_BALANCE);
-  const [portfolioPnL, setPortfolioPnL] = useState(INITIAL_PORTFOLIO_PNL);
-  const [username, setUsername] = useState("DEMO");
-  const [showToast, setShowToast] = useState(false);
-  const [profileOpen, setProfileOpen] = useState(false);
+const ACCOUNT_CACHE_KEY_PREFIX = "siliconpredict.accountCache";
 
+type CachedAccountState = {
+  username: string;
+  cashBalance?: number;
+  portfolioPnL?: number;
+};
+
+const getAccountCacheKey = (guestId: string): string =>
+  `${ACCOUNT_CACHE_KEY_PREFIX}:${guestId}`;
+
+const readCachedAccount = (guestId: string): CachedAccountState | null => {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.localStorage.getItem(getAccountCacheKey(guestId));
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    const username = String(parsed?.username || "").trim();
+    if (!username) return null;
+    return {
+      username,
+      cashBalance: Number(parsed?.cashBalance) || 0,
+      portfolioPnL: Number(parsed?.portfolioPnL) || 0,
+    };
+  } catch {
+    return null;
+  }
+};
+
+const writeCachedAccount = (guestId: string, account: CachedAccountState): void => {
+  if (typeof window === "undefined") return;
+  try {
+    const normalizedUsername = String(account.username || "").trim() || "DEMO";
+    window.localStorage.setItem(
+      getAccountCacheKey(guestId),
+      JSON.stringify({
+        username: normalizedUsername,
+        cashBalance: Number(account.cashBalance) || 0,
+        portfolioPnL: Number(account.portfolioPnL) || 0,
+      }),
+    );
+  } catch {
+    // ignore storage failures
+  }
+};
+
+const Navbar: React.FC<Props> = ({ onHome }) => {
   const apiBase = getBackendBaseURL();
   const guestId = getOrCreateGuestId();
+  const cachedAccount = readCachedAccount(guestId);
+
+  const [cashBalance, setCashBalance] = useState(
+    Number.isFinite(cachedAccount?.cashBalance)
+      ? Math.max(0, Number(cachedAccount?.cashBalance))
+      : INITIAL_CASH_BALANCE,
+  );
+  const [portfolioPnL, setPortfolioPnL] = useState(
+    Number.isFinite(cachedAccount?.portfolioPnL)
+      ? Number(cachedAccount?.portfolioPnL)
+      : INITIAL_PORTFOLIO_PNL,
+  );
+  const [username, setUsername] = useState(cachedAccount?.username || "DEMO");
+  const [showToast, setShowToast] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
 
   useEffect(() => {
     fetch(`${apiBase}/api/account`, {
@@ -48,6 +103,11 @@ const Navbar: React.FC<Props> = ({ onHome }) => {
         setCashBalance(nextCash);
         setPortfolioPnL(nextPortfolio);
         setUsername(nextUsername);
+        writeCachedAccount(guestId, {
+          username: nextUsername,
+          cashBalance: nextCash,
+          portfolioPnL: nextPortfolio,
+        });
         emitAccountUpdated({
           cashBalance: nextCash,
           portfolioPnL: nextPortfolio,
@@ -55,7 +115,7 @@ const Navbar: React.FC<Props> = ({ onHome }) => {
         });
       })
       .catch(() => {
-        // Keep local defaults if backend is unavailable.
+        // Keep local cached/defaults if backend is unavailable.
       });
   }, [apiBase, guestId]);
 
@@ -70,6 +130,13 @@ const Navbar: React.FC<Props> = ({ onHome }) => {
       const nextPortfolio = Number(custom.detail?.portfolioPnL);
       const nextUsername = custom.detail?.username;
 
+      const resolvedCash = Number.isFinite(nextCash) && nextCash >= 0 ? nextCash : cashBalance;
+      const resolvedPortfolio = Number.isFinite(nextPortfolio)
+        ? nextPortfolio
+        : portfolioPnL;
+      const resolvedUsername =
+        typeof nextUsername === "string" && nextUsername.trim() ? nextUsername : username;
+
       if (Number.isFinite(nextCash) && nextCash >= 0) {
         setCashBalance(nextCash);
       }
@@ -79,11 +146,17 @@ const Navbar: React.FC<Props> = ({ onHome }) => {
       if (typeof nextUsername === "string" && nextUsername.trim()) {
         setUsername(nextUsername);
       }
+
+      writeCachedAccount(guestId, {
+        username: resolvedUsername,
+        cashBalance: resolvedCash,
+        portfolioPnL: resolvedPortfolio,
+      });
     };
 
     window.addEventListener("accountUpdated", onAccountUpdated);
     return () => window.removeEventListener("accountUpdated", onAccountUpdated);
-  }, []);
+  }, [guestId, username, cashBalance, portfolioPnL]);
 
   const handleDeposit = async () => {
     try {
@@ -113,6 +186,11 @@ const Navbar: React.FC<Props> = ({ onHome }) => {
       setCashBalance(nextCash);
       setPortfolioPnL(nextPortfolio);
       setUsername(nextUsername);
+      writeCachedAccount(guestId, {
+        username: nextUsername,
+        cashBalance: nextCash,
+        portfolioPnL: nextPortfolio,
+      });
       emitAccountUpdated({
         cashBalance: nextCash,
         portfolioPnL: nextPortfolio,
@@ -156,7 +234,6 @@ const Navbar: React.FC<Props> = ({ onHome }) => {
             </button>
           ))}
         </div>
-
       </div>
 
       <div className="relative flex items-center gap-2">
