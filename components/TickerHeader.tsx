@@ -13,7 +13,6 @@ interface Props {
   className?: string;
   showTickerSelector?: boolean;
   maskExtendedStats?: boolean;
-  showSessionRemaining?: boolean;
 }
 
 const SESSION_SLOTS_MINUTES = [8 * 60 + 30, 12 * 60, 15 * 60 + 30];
@@ -54,7 +53,6 @@ const TickerHeader: React.FC<Props> = ({
   className = "",
   showTickerSelector = true,
   maskExtendedStats = false,
-  showSessionRemaining = true,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [nowTick, setNowTick] = useState(() => Date.now());
@@ -102,13 +100,21 @@ const TickerHeader: React.FC<Props> = ({
     const now = new Date(nowTick);
     const minutes = now.getHours() * 60 + now.getMinutes();
 
-    // Fixed daily slots: 8:30, 12:00, 3:30.
-    let completed = 0;
-    if (minutes >= SESSION_SLOTS_MINUTES[0]) completed = 1;
-    if (minutes >= SESSION_SLOTS_MINUTES[1]) completed = 2;
-    if (minutes >= SESSION_SLOTS_MINUTES[2]) completed = 3;
+    // Expected cycle by UX request:
+    // <8:30 => 3/3, 8:30-11:59 => 2/3, 12:00-3:29 => 1/3, >=3:30 => 3/3 (next cycle)
+    let remaining = 3;
+    if (minutes >= SESSION_SLOTS_MINUTES[0] && minutes < SESSION_SLOTS_MINUTES[1]) {
+      remaining = 2;
+    } else if (
+      minutes >= SESSION_SLOTS_MINUTES[1] &&
+      minutes < SESSION_SLOTS_MINUTES[2]
+    ) {
+      remaining = 1;
+    } else {
+      remaining = 3;
+    }
 
-    const remaining = Math.max(0, SESSION_SLOTS_MINUTES.length - completed);
+    const completed = Math.max(0, SESSION_SLOTS_MINUTES.length - remaining);
 
     return {
       completed,
@@ -220,31 +226,7 @@ const TickerHeader: React.FC<Props> = ({
         </div>
 
 
-        {showSessionRemaining ? (
-        <div className="hidden md:flex items-center gap-3 border-l border-[#1a2e2e] pl-5 shrink-0">
-          <div className="flex flex-col justify-center">
-            <span className="text-[8px] text-[#7f8c8d] uppercase tracking-widest leading-none">
-              Sessions Remaining
-            </span>
-            <div className="mt-1 flex items-center gap-1.5">
-              {sessionProgress.dots.map((isDone, idx) => (
-                <span
-                  key={idx}
-                  className={`inline-block w-1.5 h-1.5 rounded-full ${
-                    isDone ? "bg-[#00e701]" : "bg-[#3e5168]"
-                  }`}
-                />
-              ))}
-              <span className="text-[10px] font-bold text-[#9fb1c5] ml-1">
-                {sessionProgress.remaining}/{SESSION_SLOTS_MINUTES.length}
-              </span>
-
-            </div>
-          </div>
-        </div>
-
-        ) : null}
-        {showExtendedStats && (
+                {showExtendedStats && (
           <div className="hidden sm:flex items-center gap-9 border-l border-[#1a2e2e] pl-8 h-1/2">
             <div className="flex flex-col justify-center">
               <span className="text-[13px] font-bold text-white leading-none">
@@ -278,6 +260,8 @@ const TickerHeader: React.FC<Props> = ({
 };
 
 export default TickerHeader;
+
+
 
 
 
