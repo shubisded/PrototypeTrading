@@ -238,6 +238,16 @@ const Navbar: React.FC<Props> = ({ onHome }) => {
 
       <div className="relative flex items-center gap-2">
         <div className="hidden md:flex items-center gap-2.5">
+          <div className="h-10 min-w-[108px] px-3 rounded-lg bg-[#0b1818] border border-[#1a2e2e] flex flex-col justify-center">
+            <p className="text-[9px] text-[#7f8c8d] uppercase tracking-[0.12em] font-bold leading-none">
+              Portfolio
+            </p>
+            <p
+              className={`text-[13px] font-bold leading-tight mt-1 ${portfolioPnL >= 0 ? "text-[#2ed3b7]" : "text-rose-500"}`}
+            >
+              ${portfolioPnL.toFixed(2)}
+            </p>
+          </div>
 
           <div className="h-10 min-w-[108px] px-3 rounded-lg bg-[#0b1818] border border-[#1a2e2e] flex flex-col justify-center">
             <p className="text-[9px] text-[#7f8c8d] uppercase tracking-[0.12em] font-bold leading-none">
@@ -325,4 +335,5 @@ const Navbar: React.FC<Props> = ({ onHome }) => {
 };
 
 export default Navbar;
+
 
