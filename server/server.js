@@ -381,6 +381,14 @@ const buildStrictSessionTimeline = (count, endDate, endSlotIndex) => {
   return timeline;
 };
 
+const getLatestHistoryTimestamp = () => {
+  const firstTicker = Object.keys(pricesData.priceHistory)[0];
+  const entries = firstTicker ? pricesData.priceHistory[firstTicker] : [];
+  const lastIso = entries?.[entries.length - 1]?.timestamp;
+  const parsed = lastIso ? new Date(lastIso) : null;
+  if (parsed && !Number.isNaN(parsed.getTime())) return parsed;
+  return getPrevOrCurrentSessionSlot(new Date());
+};
 const normalizePriceHistoryTimeline = () => {
   const alignedEnd = alignTimestampToSlotIndex(
     new Date(sessionState.lastSessionAt || getLatestHistoryTimestamp().toISOString()),
@@ -1767,6 +1775,7 @@ httpServer.listen(PORT, () => {
   console.log(`Prices file: ${PRICES_FILE}`);
   console.log(`Account file: ${ACCOUNT_FILE}`);
 });
+
 
 
 
