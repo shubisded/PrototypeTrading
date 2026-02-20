@@ -321,6 +321,15 @@ const getSessionSlotIndex = (date) => {
   const minutes = date.getUTCHours() * 60 + date.getUTCMinutes();
   return SESSION_SLOTS_MINUTES.findIndex((slot) => slot === minutes);
 };
+
+const getMonthlySettlementAt = (baseDate) => {
+  const parsed = new Date(baseDate || new Date().toISOString());
+  const safe = Number.isNaN(parsed.getTime()) ? new Date() : parsed;
+  const target = new Date(
+    Date.UTC(safe.getUTCFullYear(), safe.getUTCMonth() + 1, 1, 8, 30, 0, 0),
+  );
+  return target.toISOString();
+};
 const alignTimestampToSlotIndex = (baseDate, slotIndex) => {
   const date = new Date(baseDate);
   const safeIndex = Number.isInteger(Number(slotIndex))
@@ -607,13 +616,21 @@ const settleDuePredictionPositions = () => {
     const stillOpen = [];
 
     prediction.openPositions.forEach((position) => {
-      if (position.period === "MONTHLY") {
-        stillOpen.push(position);
-        return;
-      }
-
+      const currentSessionAt = new Date(sessionState.lastSessionAt || new Date().toISOString());
       const sessionsHeld = sessionState.skipSessionCount - position.openedSession;
-      if (sessionsHeld < 3) {
+
+      if (position.period === "MONTHLY") {
+        const settlementAt = new Date(
+          String(
+            position.settlementAt ||
+              getMonthlySettlementAt(position.createdAt || sessionState.lastSessionAt),
+          ),
+        );
+        if (Number.isNaN(settlementAt.getTime()) || currentSessionAt < settlementAt) {
+          stillOpen.push(position);
+          return;
+        }
+      } else if (sessionsHeld < 3) {
         stillOpen.push(position);
         return;
       }
@@ -642,7 +659,10 @@ const settleDuePredictionPositions = () => {
         realizedPnl: parseFloat(realizedPnl.toFixed(4)),
         result: isWinningPosition ? "WIN" : "LOSS",
         session: sessionState.skipSessionCount,
-        note: `Settled after ${sessionsHeld} sessions`,
+        note:
+          position.period === "MONTHLY"
+            ? `Monthly settlement (${position.ticker})`
+            : `Settled after ${sessionsHeld} sessions`,
       });
       appendActivity(
         `${actor}: Settlement ${position.ticker} ${position.outcome === "YES" ? "UP" : "DOWN"} ${isWinningPosition ? "WIN" : "LOSS"}`,
@@ -808,6 +828,14 @@ const sanitizeSyntheticState = (raw) => {
             units: parseFloat(units.toFixed(6)),
             avgEntryPrice: parseFloat(avgEntryPrice.toFixed(4)),
             investedAmount: parseFloat(investedAmount.toFixed(4)),
+            settlementAt:
+              market.period === "MONTHLY"
+                ? (() => {
+                    const candidate = new Date(String(position?.settlementAt || ""));
+                    if (!Number.isNaN(candidate.getTime())) return candidate.toISOString();
+                    return getMonthlySettlementAt(position?.createdAt || new Date().toISOString());
+                  })()
+                : null,
             createdAt: position?.createdAt || new Date().toISOString(),
             updatedAt: position?.updatedAt || new Date().toISOString(),
           };
@@ -909,6 +937,14 @@ const sanitizePredictionState = (raw) => {
             openedSession: Number.isFinite(openedSession)
               ? Math.max(0, Math.floor(openedSession))
               : 0,
+            settlementAt:
+              market.period === "MONTHLY"
+                ? (() => {
+                    const candidate = new Date(String(position?.settlementAt || ""));
+                    if (!Number.isNaN(candidate.getTime())) return candidate.toISOString();
+                    return getMonthlySettlementAt(position?.createdAt || new Date().toISOString());
+                  })()
+                : null,
             createdAt: position?.createdAt || new Date().toISOString(),
             updatedAt: position?.updatedAt || new Date().toISOString(),
           };
@@ -1344,6 +1380,10 @@ const executePredictionTrade = ({
         Number(sessionState.priceToBeat[market.category] || centralPrices[market.category] || 0).toFixed(3),
       ),
       openedSession: sessionState.skipSessionCount,
+      settlementAt:
+        market.period === "MONTHLY"
+          ? getMonthlySettlementAt(sessionState.lastSessionAt || nowIso)
+          : null,
       createdAt: nowIso,
       updatedAt: nowIso,
     };
@@ -1775,6 +1815,8 @@ httpServer.listen(PORT, () => {
   console.log(`Prices file: ${PRICES_FILE}`);
   console.log(`Account file: ${ACCOUNT_FILE}`);
 });
+
+
 
 
 
