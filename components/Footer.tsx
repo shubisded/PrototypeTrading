@@ -8,7 +8,7 @@ const Footer: React.FC = () => {
         <div className="flex items-center gap-2 bg-[#0c1515] border border-[#1a2e2e] rounded-full px-4 py-2 shadow-lg">
           <span className="w-2 h-2 rounded-full bg-[#2ed3b7] shadow-[0_0_8px_#2ed3b7]"></span>
           <span className="text-[11px] font-bold text-[#2ed3b7] uppercase tracking-[0.14em]">
-            Floor: Mainnet
+            Prototype
           </span>
         </div>
         <div className="hidden lg:flex items-center gap-6 ml-6">
@@ -46,3 +46,4 @@ const Footer: React.FC = () => {
 };
 
 export default Footer;
+
