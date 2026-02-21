@@ -81,7 +81,7 @@ const LandingPage: React.FC<Props> = ({
 
       <div className="mb-6 bg-[#0c1515] border border-[#1a2e2e] rounded-xl px-6 py-5">
         <h1 className="text-5xl md:text-6xl font-black uppercase tracking-[0.08em] text-white leading-none">
-          Trade or Predict DRAM Prices
+          The Global DRAM Market
         </h1>
       </div>
 
@@ -188,4 +188,5 @@ const LandingPage: React.FC<Props> = ({
 };
 
 export default LandingPage;
+
 
